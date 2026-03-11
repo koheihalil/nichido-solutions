@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nichido Solutions Inc.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700&family=Fragment+Mono&family=Inter:wght@400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    img, video { display: block; }
+    a { text-decoration: none; }
+
+    /* ===== LENIS ===== */
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
+    .lenis.lenis-stopped { overflow: hidden; }
+    .lenis.lenis-smooth iframe { pointer-events: none; }
+
+    /* ===== TOKENS ===== */
+    :root {
+      --bg:       #e9e9e9;
+      --accent:   #d0fd36;
+      --dark-1:   #323538;
+      --dark-2:   #202224;
+      --blue:     #0000d0;
+      --gray:     #909090;
+      --muted:    #686868;
+      --f-ep:     'Epilogue', sans-serif;
+      --f-mono:   'Fragment Mono', monospace;
+      --f-inter:  'Inter', sans-serif;
+      --r-card:   44px;
+      /* Padding scales from 54px (≈780px viewport) → 100px (1440px viewport) */
+      --page-pad: clamp(54px, 6.94vw, 100px);
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: url('./assets/bg-texture.png');
+      background-size: 1024px 1024px;
+      font-family: var(--f-ep);
+      color: #000;
+      overflow-x: hidden;
+    }
+
+    /* ===================== NAV ===================== */
+    nav {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px var(--page-pad);
+    }
+    .nav-logo {
+      font-family: var(--f-ep);
+      font-weight: 700;
+      font-size: 16px;
+      color: #000;
+    }
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 32px;
+      font-family: var(--f-mono);
+      font-size: 13px;
+    }
+    .nav-links a { color: #000; opacity: 0.75; transition: opacity .2s; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .nav-burger span { display: block; width: 20px; height: 1.5px; background: #000; }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      position: relative;
+      height: 810px;
+      overflow: hidden;
+    }
+    .hero video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .hero-heading {
+      position: absolute;
+      top: 112px;
+      left: var(--page-pad);
+      z-index: 1;
+      font-family: var(--f-ep);
+      font-weight: 400;
+      font-size: 70px;
+      line-height: 1.15;
+      letter-spacing: -2.8px;
+      color: #000;
+      max-width: 644px;
+    }
+    .hero-cta {
+      position: absolute;
+      right: var(--page-pad);
+      bottom: 52px;
+      z-index: 1;
+      background: rgba(221, 250, 125, 0.95);
+      border: 1px solid rgba(221, 250, 125, 0.95);
+      border-radius: 8px;
+      padding: 28px 29px;
+      width: 398px;
+    }
+    .hero-cta p {
+      font-family: var(--f-mono);
+      font-size: 17px;
+      line-height: 1.5;
+      margin-bottom: 28px;
+      max-width: 316px;
+    }
+
+    /* ===================== BUTTONS ===================== */
+    .btn-dark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #000;
+      color: #fff;
+      font-family: var(--f-ep);
+      font-weight: 500;
+      font-size: 15px;
+      padding: 14px 24px;
+      border-radius: 46px;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-accent {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--accent);
+      color: #0c0400;
+      font-family: var(--f-ep);
+      font-weight: 500;
+      font-size: 16px;
+      padding: 13px 26px 13px 22px;
+      border-radius: 73px;
+      border: none;
+      cursor: pointer;
+    }
+    /* Arrow: line + arrowhead via ::after */
+    .btn-accent .arrow-line {
+      position: relative;
+      display: inline-block;
+      width: 22px;
+      height: 1.5px;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .btn-accent .arrow-line::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      border-top: 1.5px solid currentColor;
+      border-right: 1.5px solid currentColor;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 25px;
+      border: 1px solid #000;
+      border-radius: 47px;
+      font-family: var(--f-ep);
+      font-weight: 600;
+      font-size: 17px;
+    }
+
+    /* ===================== ABOUT ===================== */
+    #about {
+      padding: 90px var(--page-pad) 0;
+    }
+    .about-body {
+      margin-top: clamp(80px, 15.7vw, 226px);
+      /* 233px at 1440px, scales down proportionally with viewport */
+      margin-left: clamp(0px, 16.18vw, 233px);
+      margin-right: clamp(0px, 16.18vw, 233px);
+      padding-bottom: clamp(60px, 9.79vw, 141px);
+      font-family: var(--f-ep);
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 30px;
+      letter-spacing: -0.4px;
+      color: #535353;
+    }
+    .about-body p + p { margin-top: 0; }
+    /* Inline name — large semibold, flows with surrounding text */
+    .about-name {
+      font-family: var(--f-ep);
+      font-weight: 600;
+      font-size: 35px;
+      letter-spacing: -1.05px;
+      line-height: 30px;
+      color: #000;
+      vertical-align: baseline;
+    }
+    .c-blue { color: var(--blue); }
+    .c-dim  { color: #535353; }
+    .c-bold { font-family: var(--f-ep); font-weight: 500; font-size: 20px; }
+
+    /* ===================== RESEARCH ===================== */
+    #research {
+      padding: 48px var(--page-pad) 88px;
+    }
+    .cards-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 70px;
+      padding: 0 var(--page-pad);
+    }
+
+    /* --- Base card --- */
+    .card {
+      position: relative;
+      border-radius: var(--r-card);
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+    }
+    .card::before, .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: var(--r-card);
+    }
+    .card::after { background-size: 1024px 1024px; z-index: 1; }
+
+    /* clamp min-height so cards scale with viewport and never clip text at iPad widths */
+    .card-writing             { color: #fff; min-height: clamp(480px, 49.2vw, 708px); }
+    .card-writing::before     { background: var(--dark-1); }
+    .card-writing::after      { background-image: url('./assets/noise-writing.png'); opacity: .22; }
+
+    .card-measurement         { min-height: clamp(480px, 49.4vw, 711px); }
+    .card-measurement::before { background: rgba(190,193,198,.3); }
+    .card-measurement::after  { background-image: url('./assets/noise-measurement.png'); opacity: .14; }
+
+    .card-commerce            { min-height: clamp(460px, 46.4vw, 668px); }
+    .card-commerce::before    { background: rgba(190,193,198,.3); }
+    .card-commerce::after     { background-image: url('./assets/noise-commerce.png'); opacity: .13; }
+
+    /* --- Card inner: unified across all 3 cards (measurement is the reference) --- */
+    .card-inner {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(50px, 6.25vw, 90px) 0 clamp(48px, 5.97vw, 86px) clamp(52px, 6.94vw, 100px);
+      max-width: 576px;
+    }
+
+    /* --- Decorative images: right edge always flush with card right edge --- */
+    .card-img {
+      position: absolute;
+      pointer-events: none;
+      z-index: 2;
+    }
+    /*
+      Writing: right=0, top=11.6%, w=45.1%, h=86.6%
+      Right edge is flush with card right.
+    */
+    .card-writing .card-img {
+      right: 0; top: 11.6%;
+      width: 45.1%; height: 86.6%;
+      object-fit: cover; object-position: left top;
+      opacity: .84;
+    }
+    /*
+      Measurement: right=0, top=5.8%, w=56.6%, h=88.5%
+      Right edge flush with card right (left=43.4%+w=56.6%=100%).
+    */
+    .card-measurement .card-img {
+      right: 0; top: 5.8%;
+      width: 56.6%; height: 88.5%;
+      object-fit: cover; object-position: left top;
+      opacity: .80;
+    }
+    /*
+      Commerce: right=0, top=28.1%, w=67.8%, h=71.8%
+      Right edge flush. bottom-right radius clips corner.
+    */
+    .card-commerce .card-img {
+      right: 0; top: 28.1%;
+      width: 67.8%; height: 71.8%;
+      object-fit: cover; object-position: left top;
+      opacity: .80;
+      border-bottom-right-radius: var(--r-card);
+    }
+
+    /* --- Card typography --- */
+    .card-title {
+      font-family: var(--f-ep);
+      font-weight: 500;
+      font-size: clamp(28px, 3.19vw, 46px);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .card-sub {
+      font-family: var(--f-mono);
+      font-size: clamp(15px, 1.875vw, 27px);
+      line-height: 1.7;
+      letter-spacing: -.54px;
+    }
+    .card-body {
+      font-family: var(--f-mono);
+      font-size: clamp(13px, 1.18vw, 17px);
+      line-height: 1.53;
+      letter-spacing: -.34px;
+      max-width: 440px;
+      margin-top: 48px;
+    }
+
+    /* ===================== WHAT IF ===================== */
+    #values {
+      display: grid;
+      grid-template-columns: 849fr 440fr;
+      gap: 44px;
+      padding: 20px var(--page-pad);
+      margin-top: 150px;
+    }
+    .whatif-dark {
+      position: relative;
+      border-radius: var(--r-card);
+      background: var(--dark-2);
+      overflow: hidden;
+      min-height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .whatif-dark::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url('./assets/noise-whatif.png');
+      background-size: 1024px 1024px;
+      opacity: .39;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .whatif-text {
+      position: relative;
+      z-index: 2;
+      font-family: var(--f-ep);
+      font-weight: 400;
+      font-size: 126px;
+      color: #ececec;
+      letter-spacing: -7.98px;
+      line-height: 1;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .whatif-text .qm { font-family: var(--f-inter); font-size: 130px; }
+
+    /* Quote card: video background */
+    .whatif-quote {
+      position: relative;
+      border-radius: var(--r-card);
+      min-height: 440px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      background: #202224;
+    }
+    .whatif-video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: .85;
+    }
+    .whatif-quote-text {
+      position: relative;
+      z-index: 2;
+      font-family: var(--f-mono);
+      font-size: 19px;
+      line-height: 1.321;
+      letter-spacing: -.57px;
+      text-align: center;
+      color: #000;
+      max-width: 296px;
+    }
+
+    /* ===================== CTA ===================== */
+    #careers {
+      margin-top: 90px;
+      background: #f4f4f4;
+      border-top-left-radius: var(--r-card);
+      padding: 90px 0 77px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 46px;
+      text-align: center;
+    }
+    #careers h2 {
+      font-family: var(--f-ep);
+      font-weight: 400;
+      font-size: 45px;
+    }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      background: #000;
+      color: #fff;
+      padding: 87px 194px 60px 157px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .footer-brand-name { font-family: var(--f-ep); font-weight: 600; font-size: 17px; margin-bottom: 18px; }
+    .footer-brand-sub  { font-family: var(--f-inter); font-size: 17px; line-height: 1.305; color: var(--gray); }
+    .footer-copy       { font-family: var(--f-ep); font-size: 15px; color: var(--muted); margin-top: 48px; }
+    .footer-nav {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      font-family: var(--f-inter);
+      font-size: 17px;
+    }
+    .footer-nav a { color: var(--gray); transition: color .2s; }
+    .footer-nav a:hover { color: #fff; }
+
+    /* ===================== SCROLL ANIMATIONS ===================== */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+
+    /* Measurement + Commerce: snap text width narrow at 1365px so it clears the image */
+    @media (min-width: 769px) and (max-width: 1365px) {
+      .card-measurement .card-body,
+      .card-commerce .card-body {
+        max-width: 260px;
+      }
+    }
+
+    /* ===================== MOBILE (iPhone — rebuilt from Figma 33:47) ===================== */
+    @media (max-width: 768px) {
+      :root { --r-card: 25px; --page-pad: 19px; }
+
+      /* Nav */
+      nav { padding: 20px var(--page-pad); }
+      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+
+      /* Hero */
+      .hero { height: 560px; }
+      .hero-heading {
+        top: 80px; left: var(--page-pad);
+        font-size: 33px; letter-spacing: -1.32px; max-width: 290px;
+      }
+      .hero-cta { display: none; }
+
+      /* About */
+      #about { padding: 40px var(--page-pad) 0; }
+      .about-body {
+        margin-top: 56px;
+        margin-left: 0;
+        margin-right: 0;
+        padding-bottom: 48px;
+        font-size: 15px;
+        line-height: 24px;
+        letter-spacing: -0.3px;
+      }
+      .about-body p + p { margin-top: 0; }
+      .about-name { font-size: 22px; letter-spacing: -.66px; line-height: 26px; }
+      .c-bold { font-size: 15px; }
+
+      /* Research label */
+      #research { padding: 28px var(--page-pad) 60px; }
+      .pill { font-size: 14px; padding: 8px 20px; }
+
+      /* Cards wrap */
+      .cards-wrap { padding: 0 var(--page-pad); gap: 60px; }
+
+      /*
+        ── Mobile card layout (Figma iPhone 33:47) ──
+        Each card: title+subtitle at top, decorative image in middle,
+        body text at bottom. Image is absolute, text via card-inner flex.
+      */
+
+      /* Reset desktop constraints */
+      .card-writing, .card-measurement, .card-commerce {
+        min-height: 0;
+      }
+
+      /* Mobile card: elongated with title at top, body pushed to bottom */
+      .card-writing, .card-measurement, .card-commerce { min-height: 480px; }
+
+      .card-inner {
+        padding: 32px 25px 36px 25px !important;
+        max-width: 100% !important;
+        width: 100%;
+        min-height: 480px !important;
+        justify-content: space-between !important;
+      }
+
+      .card-title { font-size: 22px; line-height: 1.15; margin-bottom: 4px; }
+      .card-sub   { font-size: 13px; line-height: 1.5; letter-spacing: -.26px; }
+      .card-body  {
+        font-size: 14px; line-height: 1.6;
+        letter-spacing: -.28px; max-width: 100%;
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      /* Mobile images — explicitly override all desktop top/left/right/bottom */
+      .card-writing .card-img {
+        display: block; position: absolute;
+        right: 0; top: 0; left: auto; bottom: auto;
+        transform: none;
+        width: 80%; height: auto;
+        object-fit: unset;
+        opacity: 0.26; border-radius: 0;
+      }
+      .card-measurement .card-img {
+        display: block; position: absolute;
+        right: 0; top: 0; left: auto; bottom: auto;
+        transform: none;
+        width: 95%; height: auto;
+        object-fit: unset;
+        opacity: 0.26; border-radius: 0;
+      }
+      .card-commerce .card-img {
+        display: block; position: absolute;
+        right: 0; bottom: 0; top: auto; left: auto;
+        transform: none;
+        width: 170%; height: auto;
+        object-fit: unset;
+        opacity: 0.26; border-radius: 0;
+      }
+      /* Commerce: reduce vertical space to ~2/3 of other cards */
+      .card-commerce .card-inner {
+        min-height: 320px !important;
+      }
+
+      /* What if */
+      #values {
+        grid-template-columns: 1fr;
+        padding: 16px var(--page-pad);
+        gap: 16px;
+        margin-top: 60px;
+      }
+      .whatif-dark { min-height: 150px; }
+      .whatif-text { font-size: 50px; letter-spacing: -5px; }
+      .whatif-text .qm { font-size: 52px; }
+      .whatif-quote { min-height: 280px; padding: 36px 24px; }
+      .whatif-quote-text { font-size: 15px; max-width: 240px; }
+
+      /* CTA */
+      #careers {
+        margin-top: 40px;
+        border-top-left-radius: 25px;
+        border-top-right-radius: 25px;
+        padding: 48px 24px 72px;
+        gap: 28px;
+      }
+      #careers h2 { font-size: 22px; }
+
+      /* Footer */
+      footer { flex-direction: column; padding: 33px 21px 48px; gap: 28px; }
+      .footer-brand-name { font-size: 13px; }
+      .footer-brand-sub  { font-size: 12px; }
+      .footer-copy       { font-size: 11px; margin-top: 16px; }
+      .footer-nav        { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== NAV ========== -->
+  <nav>
+    <a href="#" class="nav-logo">Nichido Solutions Inc.</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#values">Values</a></li>
+      <li><a href="#careers">Careers</a></li>
+    </ul>
+    <button class="nav-burger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero">
+    <video autoplay loop muted playsinline>
+      <source src="./finall.mp4" type="video/mp4">
+    </video>
+    <h1 class="hero-heading" data-reveal>Private research and development from Kyoto, Japan.</h1>
+    <div class="hero-cta" data-reveal style="--reveal-delay:150ms">
+      <p>Interested in working with us or learning more about our research?</p>
+      <a href="#careers" class="btn-dark">Get In Touch ↗</a>
+    </div>
+  </section>
+
+  <!-- ========== ABOUT ========== -->
+  <section id="about">
+    <span class="pill" data-reveal>About Us</span>
+    <div class="about-body" data-reveal style="--reveal-delay:100ms">
+      <p>
+        <span class="about-name">Nichido Solutions Inc.</span>
+        <span class="c-dim"> is a private research and development company based </span><span class="c-blue c-bold">in Kyoto, Japan.</span>
+      </p>
+      <p>&nbsp;</p>
+      <p>
+        <span class="c-dim">Our work focuses on identifying inefficiencies in the foundational systems that shape modern infrastructure. We conduct research in several key domains including </span><span class="c-bold c-blue">communication systems, measurement standards, and global commerce.</span><span class="c-dim"> In many of these areas, existing paradigms were not designed for the technological and economic demands of the future. Our goal is to explore how these systems could be redesigned and improved to create lasting value for industry and society.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== RESEARCH LABEL ========== -->
+  <div id="research">
+    <span class="pill" data-reveal>Our Research:</span>
+  </div>
+
+  <!-- ========== RESEARCH CARDS ========== -->
+  <div class="cards-wrap">
+
+    <!-- Writing (dark) -->
+    <article class="card card-writing" data-reveal>
+      <img class="card-img" src="./assets/img-writing.png" alt="">
+      <div class="card-inner">
+        <div>
+          <h2 class="card-title">Rethinking Writing:</h2>
+          <p class="card-sub">Systems for Clearer Thought</p>
+        </div>
+        <p class="card-body">In an age of information overload, how can we improve our most fundamental tool for thinking? We are engineering new writing systems designed from the ground up to enhance human cognition, enabling more efficient reading, intuitive writing, and ultimately, more powerful structured thought.</p>
+      </div>
+    </article>
+
+    <!-- Measurement (light) -->
+    <article class="card card-measurement" data-reveal>
+      <img class="card-img" src="./assets/img-measurement.png" alt="">
+      <div class="card-inner">
+        <div>
+          <h2 class="card-title">Rethinking Measurement:</h2>
+          <p class="card-sub">Redefining Fit for Global Commerce</p>
+        </div>
+        <p class="card-body">How can we solve the universal problem of inconsistent sizing that plagues online retail? Our research focuses on creating new universal standards for physical goods. We are developing intelligent frameworks that allows for perfect size translation across brands and regions, eliminating uncertainty for shoppers and costly inefficiencies for businesses.</p>
+      </div>
+    </article>
+
+    <!-- Commerce (light) -->
+    <article class="card card-commerce" data-reveal>
+      <img class="card-img" src="./assets/img-commerce.png" alt="">
+      <div class="card-inner">
+        <div>
+          <h2 class="card-title">Direct Commerce:</h2>
+          <p class="card-sub">A New Architecture for Global Trade</p>
+        </div>
+        <p class="card-body">What would a truly borderless marketplace look like? We are architecting next-generation frameworks for cross-border e-commerce. This model is designed to empower international shoppers and sellers to connect and transact directly, removing unnecessary intermediaries to create a more transparent and efficient global market.</p>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- ========== WHAT IF ========== -->
+  <div id="values">
+    <div class="whatif-dark" data-reveal>
+      <span class="whatif-text">What if<span class="qm">?</span></span>
+    </div>
+    <div class="whatif-quote" data-reveal style="--reveal-delay:120ms">
+      <video class="whatif-video" autoplay loop muted playsinline>
+        <source src="./assets/vid-whatif.mp4" type="video/mp4">
+        <source src="./assets/vid-whatif.mp4" type="video/quicktime">
+      </video>
+      <p class="whatif-quote-text">
+        We have always asked ourselves what if.<br>
+        Before decisions.<br>
+        Before conclusions.<br>
+        Before certainty.<br><br>
+        The question comes first.
+      </p>
+    </div>
+  </div>
+
+  <!-- ========== CTA ========== -->
+  <section id="careers">
+    <h2 data-reveal>Want to work with us?</h2>
+    <a href="mailto:nichidosolutions@gmail.com" class="btn-accent" data-reveal style="--reveal-delay:100ms">
+      <span class="arrow-line"></span>Get In Touch
+    </a>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    <div>
+      <div class="footer-brand-name">Nichido Solutions Inc.</div>
+      <div class="footer-brand-sub">
+        Private research and development<br><br>
+        Kyoto, Japan
+      </div>
+      <div class="footer-copy">© 2025 Nichido Solutions Inc.</div>
+    </div>
+    <ul class="footer-nav">
+      <li><a href="#about">About</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#values">Values</a></li>
+      <li><a href="#careers">Careers</a></li>
+    </ul>
+  </footer>
+
+  <!-- Lenis smooth scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
+  <script>
+    /* ── Mobile nav toggle ── */
+    const burger = document.querySelector('.nav-burger');
+    const links  = document.querySelector('.nav-links');
+    burger.addEventListener('click', () => {
+      const open = links.style.display === 'flex';
+      links.style.display = open ? 'none' : 'flex';
+      if (!open) {
+        Object.assign(links.style, {
+          flexDirection: 'column',
+          position:      'absolute',
+          top:           '64px',
+          left:          '0',
+          right:         '0',
+          background:    '#e9e9e9',
+          padding:       '24px 19px 32px',
+          gap:           '20px',
+          fontSize:      '17px',
+          zIndex:        '998',
+        });
+      }
+    });
+    links.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => {
+        if (window.getComputedStyle(burger).display !== 'none') {
+          links.style.display = 'none';
+        }
+      })
+    );
+
+    /* ── Lenis ── */
+    const lenis = new Lenis({
+      duration: 1.6,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 0.85,
+      touchMultiplier: 1.2,
+    });
+    function lenisRaf(time) { lenis.raf(time); requestAnimationFrame(lenisRaf); }
+    requestAnimationFrame(lenisRaf);
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const href = anchor.getAttribute('href');
+        if (href === '#') return;
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) lenis.scrollTo(target, { offset: -80, duration: 1.8 });
+      });
+    });
+
+    /* ── Scroll reveal ── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.hero [data-reveal]').forEach(el => {
+        setTimeout(() => el.classList.add('is-visible'),
+          parseInt(getComputedStyle(el).getPropertyValue('--reveal-delay')) || 0);
+      });
+    });
+  </script>
+</body>
+</html>
