@@ -119,9 +119,11 @@
       width: 398px;
     }
     .hero-cta p {
-      font-family: var(--f-mono);
-      font-size: 17px;
+      font-family: var(--f-ep);          /* match cookie banner text */
+      font-weight: 400;
+      font-size: 16px;
       line-height: 1.5;
+      letter-spacing: -0.1px;
       margin-bottom: 28px;
       max-width: 316px;
     }
@@ -137,7 +139,7 @@
       font-weight: 500;
       font-size: 15px;
       padding: 14px 24px;
-      border-radius: 46px;
+      border-radius: 8px;          /* match cookie button corners */
       border: none;
       cursor: pointer;
       white-space: nowrap;
@@ -1192,7 +1194,9 @@
       applyConsent(consent);   // re-fire consented loaders on every visit (idempotent)
       setBanner(false);        // decision exists -> stay hidden until the footer link is used
     } else {
-      openBanner(false);       // no valid decision -> show first layer (two buttons)
+      // First-visit: reveal ~0.3s after load so it slides in after the page settles
+      // (the footer "Cookies" link still re-opens it instantly).
+      setTimeout(function () { openBanner(false); }, 300);
     }
   })();
   </script>
