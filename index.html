@@ -462,6 +462,27 @@
       transition-duration: 0.95s, 0.95s;
     }
 
+    /* Hero heading — word-by-word staggered fade-in (JS wraps each word in .hero-word) */
+    .hero-heading--stagger { opacity: 0; }          /* hidden until JS splits it (no flash) */
+    .hero-heading--stagger.is-split { opacity: 1; } /* container shows; words still hidden */
+    .hero-word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(0.42em);
+      transition: opacity .9s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform .9s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--w-delay, 0ms);
+      will-change: opacity, transform;
+    }
+    .hero-heading--stagger.is-visible .hero-word {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-heading--stagger { opacity: 1; }
+      .hero-word { transition: none; opacity: 1; transform: none; }
+    }
+
     /* Measurement + Commerce: snap text width narrow at 1365px so it clears the image */
     @media (min-width: 769px) and (max-width: 1365px) {
       .card-measurement .card-body,
@@ -811,7 +832,7 @@
     <video autoplay loop muted playsinline>
       <source src="./finall.mp4" type="video/mp4">
     </video>
-    <h1 class="hero-heading" data-reveal>Private research and development from Kyoto, Japan.</h1>
+    <h1 class="hero-heading hero-heading--stagger">Private research and development from Kyoto, Japan.</h1>
     <div class="hero-cta" data-reveal style="--reveal-delay:150ms">
       <p>Interested in working with us or learning more about our research?</p>
       <a href="#careers" class="btn-dark">Get In Touch ↗</a>
@@ -1058,6 +1079,25 @@
           parseInt(getComputedStyle(el).getPropertyValue('--reveal-delay')) || 0);
       });
     });
+
+    /* ── Hero heading: split into words and fade each in on a stagger ── */
+    (function () {
+      const h = document.querySelector('.hero-heading--stagger');
+      if (!h) return;
+      const words = h.textContent.trim().split(/\s+/);
+      h.textContent = '';
+      words.forEach((word, i) => {
+        const span = document.createElement('span');
+        span.className = 'hero-word';
+        span.textContent = word;
+        span.style.setProperty('--w-delay', (i * 90) + 'ms'); // stagger per word
+        h.appendChild(span);
+        if (i < words.length - 1) h.appendChild(document.createTextNode(' '));
+      });
+      h.classList.add('is-split');
+      // two frames so the initial hidden state is painted before transitioning
+      requestAnimationFrame(() => requestAnimationFrame(() => h.classList.add('is-visible')));
+    })();
   </script>
 
   <!-- ========== COOKIE CONSENT CONTROLLER ========== -->
