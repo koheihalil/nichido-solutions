@@ -110,7 +110,7 @@
     .hero-cta {
       position: absolute;
       right: var(--page-pad);
-      bottom: 52px;
+      bottom: 84px;
       z-index: 1;
       background: rgba(221, 250, 125, 0.95);
       border: 1px solid rgba(221, 250, 125, 0.95);
@@ -457,6 +457,10 @@
       transition-delay: var(--reveal-delay, 0ms);
     }
     [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+    /* Slower, gentler fade-in for the hero CTA (matches the cookie banner feel) */
+    .hero-cta[data-reveal] {
+      transition-duration: 0.95s, 0.95s;
+    }
 
     /* Measurement + Commerce: snap text width narrow at 1365px so it clears the image */
     @media (min-width: 769px) and (max-width: 1365px) {
@@ -623,7 +627,7 @@
       box-shadow: 0 12px 40px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.22);
       font-family: var(--f-ep);
       -webkit-font-smoothing: antialiased;
-      animation: ccIn .55s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: ccIn .95s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
     .cc-banner__text {
