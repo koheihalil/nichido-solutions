@@ -592,7 +592,195 @@
       .footer-brand-name { font-size: 13px; }
       .footer-brand-sub  { font-size: 12px; }
       .footer-copy       { font-size: 11px; margin-top: 16px; }
-      .footer-nav        { display: none; }
+      /* Keep only the Cookies link on mobile so consent stays withdrawable on phones */
+      .footer-nav                              { display: flex; gap: 0; }
+      .footer-nav li:not(.footer-nav__cookies) { display: none; }
+      .footer-nav__cookies a                   { font-size: 13px; }
+    }
+
+    /* =====================================================================
+       COOKIE CONSENT — self-contained, no library. Reuses site tokens
+       (--f-ep Epilogue, --f-mono Fragment Mono). Black/white to match the
+       reference banner. position:fixed => out of flow, ~0 layout shift.
+       Banner is [hidden] by default; the controller script at the end of
+       <body> reveals it ONLY when there is no valid decision, so returning
+       visitors never see a flash.
+       ===================================================================== */
+    .cc-banner[hidden] { display: none; }
+
+    .cc-banner {
+      position: fixed;
+      left: 24px;
+      bottom: 24px;
+      z-index: 1001;                 /* nav 999, re-open btn 1000, banner above both */
+      width: min(420px, calc(100vw - 48px));
+      padding: 32px;
+      background: #000;
+      color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.22);
+      font-family: var(--f-ep);
+      -webkit-font-smoothing: antialiased;
+      animation: ccIn .55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .cc-banner__text {
+      margin: 0 40px 0 0;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: -0.1px;
+      color: #fff;
+    }
+
+    /* "Cookies settings" disclosure toggle */
+    .cc-banner__settings {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 0;
+      background: none;
+      border: none;
+      font-family: var(--f-ep);
+      font-weight: 500;
+      font-size: 16px;
+      color: #fff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      cursor: pointer;
+      transition: opacity .2s ease;
+    }
+    .cc-banner__settings:hover { opacity: .7; }
+
+    /* Top-right close */
+    .cc-banner__close {
+      position: absolute;
+      top: 20px; right: 20px;
+      width: 24px; height: 24px;
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0; background: none; border: none;
+      color: rgba(255,255,255,.7);
+      cursor: pointer; border-radius: 3px;
+      transition: color .2s ease, background .2s ease;
+    }
+    .cc-banner__close svg { display: block; }
+    .cc-banner__close:hover  { color: #fff; background: rgba(255,255,255,.08); }
+    .cc-banner__close:active { background: rgba(255,255,255,.14); }
+
+    /* Category panel (progressive disclosure, same element) */
+    .cc-panel { margin-top: 20px; }
+    .cc-panel[hidden] { display: none; }
+    .cc-cat {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      column-gap: 12px;
+      padding: 14px 0;
+      border-top: 1px solid rgba(255,255,255,.14);
+    }
+    .cc-cat__head { display: flex; align-items: baseline; gap: 10px; }
+    .cc-cat__name {
+      font-family: var(--f-mono);
+      font-size: 13px;
+      letter-spacing: -0.2px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+    .cc-cat__state {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+    }
+    .cc-cat__desc {
+      grid-column: 1 / 2;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(255,255,255,.72);
+    }
+    .cc-cat__toggle {
+      grid-row: 1 / 3;
+      grid-column: 2;
+      width: 18px; height: 18px;
+      accent-color: #fff;             /* neutral (not lime) */
+      /* explicit ring so the unchecked box stays visible on pure black */
+      box-shadow: 0 0 0 1px rgba(255,255,255,.45);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .cc-cat__toggle:disabled { cursor: not-allowed; opacity: .6; }
+
+    /* Action buttons — full width, stacked, EQUALLY prominent (reject == accept) */
+    .cc-banner__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .cc-banner__btn {
+      width: 100%;
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 18px 20px;
+      border-radius: 8px;
+      font-family: var(--f-ep);
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 1;
+      letter-spacing: -0.1px;
+      cursor: pointer;
+      transition: background .18s ease, border-color .18s ease, transform .05s ease;
+    }
+    .cc-banner__btn:active { transform: translateY(1px); }
+    .cc-save { margin-top: 18px; }
+
+    /* Primary: white fill / black text */
+    .cc-banner__btn--primary {
+      background: #fff; color: #000;
+      border: 1px solid #fff;
+    }
+    .cc-banner__btn--primary:hover  { background: #ececec; border-color: #ececec; }
+    .cc-banner__btn--primary:active { background: #dcdcdc; border-color: #dcdcdc; }
+
+    /* Secondary: black fill / white text — same size/weight/radius => equal prominence */
+    .cc-banner__btn--secondary {
+      background: #000; color: #fff;
+      border: 1px solid rgba(255,255,255,.35);
+    }
+    .cc-banner__btn--secondary:hover  { background: #1a1a1a; border-color: rgba(255,255,255,.55); }
+    .cc-banner__btn--secondary:active { background: #242424; border-color: rgba(255,255,255,.7); }
+
+    /* Visible focus ring — light on black, dark on the white primary fill */
+    .cc-banner__btn:focus-visible,
+    .cc-banner__close:focus-visible,
+    .cc-banner__settings:focus-visible,
+    .cc-cat__toggle:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+    .cc-banner__btn--primary:focus-visible {
+      outline: 2px solid #000;
+      outline-offset: 2px;
+    }
+
+    @keyframes ccIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile: full-width bottom sheet */
+    @media (max-width: 768px) {
+      .cc-banner {
+        left: 12px; right: 12px; bottom: 12px;
+        width: auto; padding: 24px; border-radius: 8px;
+      }
+      .cc-banner__text { font-size: 15px; margin-right: 36px; }
+      .cc-banner__btn  { padding: 16px 18px; font-size: 15px; }
+      .cc-banner__close { top: 16px; right: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cc-banner { animation: none; }
+      .cc-banner__btn:active { transform: none; }
     }
   </style>
 </head>
@@ -728,8 +916,69 @@
       <li><a href="#research">Research</a></li>
       <li><a href="#values">Values</a></li>
       <li><a href="#careers">Careers</a></li>
+      <li class="footer-nav__cookies"><a href="#" id="cc-open" aria-controls="cc-banner">Cookies</a></li>
     </ul>
   </footer>
+
+  <!-- ========== COOKIE CONSENT ========== -->
+
+  <section id="cc-banner" class="cc-banner" role="region"
+           aria-label="Cookie consent" aria-describedby="cc-banner-desc" hidden>
+
+    <button class="cc-banner__close" type="button" aria-label="Close cookie banner">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+        <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <p class="cc-banner__text" id="cc-banner-desc">
+      This site uses only essential storage to work — smooth scrolling and web fonts.
+      We don't use analytics or marketing cookies today; if that ever changes, they stay
+      off until you allow them here. Only essential cookies are on by default.
+    </p>
+
+    <!-- Expandable category panel (progressive disclosure, same element — no second modal) -->
+    <button class="cc-banner__settings" type="button"
+            aria-expanded="false" aria-controls="cc-panel">
+      Cookies settings
+    </button>
+
+    <div class="cc-panel" id="cc-panel" hidden>
+      <div class="cc-cat">
+        <div class="cc-cat__head">
+          <span class="cc-cat__name">Essential</span>
+          <span class="cc-cat__state" aria-hidden="true">Always on</span>
+        </div>
+        <p class="cc-cat__desc">Required for the site to work — remembers this choice, smooth scrolling, web fonts. No consent needed.</p>
+        <input class="cc-cat__toggle" type="checkbox" checked disabled
+               aria-label="Essential cookies, always on, cannot be turned off">
+      </div>
+
+      <div class="cc-cat">
+        <div class="cc-cat__head">
+          <span class="cc-cat__name">Analytics</span>
+        </div>
+        <p class="cc-cat__desc">Would measure anonymous usage. None are active today.</p>
+        <input class="cc-cat__toggle" id="cc-analytics" type="checkbox" aria-label="Analytics cookies">
+      </div>
+
+      <div class="cc-cat">
+        <div class="cc-cat__head">
+          <span class="cc-cat__name">Marketing</span>
+        </div>
+        <p class="cc-cat__desc">Would support campaigns and personalization. None are active today.</p>
+        <input class="cc-cat__toggle" id="cc-marketing" type="checkbox" aria-label="Marketing cookies">
+      </div>
+
+      <button class="cc-banner__btn cc-banner__btn--secondary cc-save" type="button">Save preferences</button>
+    </div>
+
+    <div class="cc-banner__actions">
+      <button class="cc-banner__btn cc-banner__btn--primary" data-cc="all" type="button">Allow all cookies</button>
+      <button class="cc-banner__btn cc-banner__btn--secondary" data-cc="reject" type="button">Do not allow cookies</button>
+    </div>
+
+  </section>
 
   <!-- Lenis smooth scroll -->
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
@@ -803,6 +1052,149 @@
           parseInt(getComputedStyle(el).getPropertyValue('--reveal-delay')) || 0);
       });
     });
+  </script>
+
+  <!-- ========== COOKIE CONSENT CONTROLLER ========== -->
+  <script>
+  (function () {
+    var KEY = 'ns_consent';
+    var VERSION = 1;                          // bump to force a global re-prompt (policy/vendors change)
+    var MAX_AGE = 182 * 24 * 60 * 60 * 1000;  // 6 months
+
+    var banner = document.getElementById('cc-banner');
+    if (!banner) { console.warn('[cookie-consent] markup missing'); return; }
+
+    var panel       = document.getElementById('cc-panel');
+    var settingsBtn = banner.querySelector('.cc-banner__settings');
+    var closeBtn    = banner.querySelector('.cc-banner__close');
+    var footerLink  = document.getElementById('cc-open');   // footer "Cookies" entry point
+    var analyticsCb = document.getElementById('cc-analytics');
+    var marketingCb = document.getElementById('cc-marketing');
+    var lastFocus   = null;
+
+    /* ---- read stored decision (valid only if current version, well-formed, fresh) ---- */
+    function readConsent() {
+      try {
+        var r = JSON.parse(localStorage.getItem(KEY));
+        if (!r || r.v !== VERSION) return null;
+        if (typeof r.analytics !== 'boolean' || typeof r.marketing !== 'boolean') return null;
+        var anchor = typeof r.lastTs === 'number' ? r.lastTs : r.ts;   // expire from last action
+        if (typeof anchor !== 'number' || Date.now() - anchor > MAX_AGE) return null;
+        return r;
+      } catch (e) { return null; }
+    }
+    var consent = readConsent();
+
+    /* ---- script gating: inject ONLY after consent. Stubs today; wire real tags later. ---- */
+    function applyConsent(rec) {
+      if (rec.analytics && !window.__ccAnalytics) {
+        window.__ccAnalytics = true;
+        /* inject GA4 / Plausible etc. here — runs only after analytics consent */
+      }
+      if (rec.marketing && !window.__ccMarketing) {
+        window.__ccMarketing = true;
+        /* inject marketing pixel here — runs only after marketing consent */
+      }
+      /* When a real tag is added: on a fresh reject, also clear any storage it set. */
+    }
+
+    /* ---- show / hide the banner (re-openable any time via the footer "Cookies" link) ---- */
+    function setBanner(show) {
+      banner.hidden = !show;
+      if (footerLink) footerLink.setAttribute('aria-expanded', show ? 'true' : 'false');
+      if (!show && panel && !panel.hidden) togglePanel(false);
+    }
+
+    function togglePanel(force) {
+      var willOpen = typeof force === 'boolean' ? force : panel.hidden;
+      panel.hidden = !willOpen;
+      settingsBtn.setAttribute('aria-expanded', String(willOpen));
+    }
+
+    function syncToggles() {
+      analyticsCb.checked = !!(consent && consent.analytics);   // never pre-ticked
+      marketingCb.checked = !!(consent && consent.marketing);
+    }
+
+    function openBanner(expand) {
+      syncToggles();
+      setBanner(true);
+      if (expand) togglePanel(true);
+    }
+
+    function restoreFocus() {
+      if (banner.contains(document.activeElement)) {
+        (lastFocus && document.contains(lastFocus) ? lastFocus : document.body).focus();
+      } else if (lastFocus && document.contains(lastFocus)) {
+        lastFocus.focus();
+      }
+      lastFocus = null;
+    }
+
+    /* ---- persist an affirmative decision ---- */
+    function save(analytics, marketing) {
+      var now = Date.now();
+      var rec = {
+        v: VERSION,
+        ts: (consent && typeof consent.ts === 'number') ? consent.ts : now, // keep original grant time
+        lastTs: now,
+        essential: true,        // informational only; never gated on
+        analytics: !!analytics,
+        marketing: !!marketing
+      };
+      try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {}
+      consent = rec;
+      applyConsent(rec);
+      setBanner(false);         // hide; re-open any time via footer "Cookies"
+      restoreFocus();
+    }
+
+    /* ---- dismiss WITHOUT storing consent (X / Esc): consent must be an affirmative act ---- */
+    function dismiss() {
+      setBanner(false);
+      restoreFocus();
+    }
+
+    /* ---- events ---- */
+    settingsBtn.addEventListener('click', function () { togglePanel(); });
+
+    banner.querySelectorAll('[data-cc]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.getAttribute('data-cc') === 'all') save(true, true);
+        else save(false, false);   // reject: all non-essential OFF
+      });
+    });
+
+    banner.querySelector('.cc-save').addEventListener('click', function () {
+      save(analyticsCb.checked, marketingCb.checked);
+    });
+
+    closeBtn.addEventListener('click', dismiss);
+
+    /* Non-modal: only handle Esc when focus is inside the banner (don't hijack global Esc) */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !banner.hidden && banner.contains(document.activeElement)) dismiss();
+    });
+
+    /* Footer "Cookies" link = re-open / withdrawal. Opens the banner with the
+       settings panel already expanded, pre-filled from the stored decision. */
+    if (footerLink) {
+      footerLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        lastFocus = footerLink;
+        openBanner(true);
+        settingsBtn.focus();   // land focus inside; do NOT auto-select any option
+      });
+    }
+
+    /* ---- boot ---- */
+    if (consent) {
+      applyConsent(consent);   // re-fire consented loaders on every visit (idempotent)
+      setBanner(false);        // decision exists -> stay hidden until the footer link is used
+    } else {
+      openBanner(false);       // no valid decision -> show first layer (two buttons)
+    }
+  })();
   </script>
 </body>
 </html>
