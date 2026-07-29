@@ -6,7 +6,7 @@
   <title>Nichido Solutions Inc.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700&family=Fragment+Mono&family=Inter:wght@400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&family=Fragment+Mono&display=swap" rel="stylesheet">
 
   <style>
     /* ===== RESET ===== */
@@ -20,811 +20,956 @@
     .lenis.lenis-stopped { overflow: hidden; }
     .lenis.lenis-smooth iframe { pointer-events: none; }
 
-    /* ===== TOKENS ===== */
+    /* =====================================================================
+       TOKENS
+       Two laws govern every number below:
+       L1  Spacing (margin/padding/gap) is a --sp-* step, or a --flow-* clamp
+           whose BOTH endpoints are --sp-* steps.
+       L2  Dimensions (heights, widths, radii, rings) are named component tokens.
+       Every fluid coefficient is (max / 14.4)vw, so all of them cap at exactly
+       --maxw 1440px and nothing changes above it.
+       ===================================================================== */
     :root {
-      --bg:       #e9e9e9;
-      --accent:   #d0fd36;
-      --dark-1:   #323538;
-      --dark-2:   #202224;
-      --blue:     #0000d0;
-      --gray:     #909090;
-      --muted:    #686868;
-      --f-ep:     'Epilogue', sans-serif;
-      --f-mono:   'Fragment Mono', monospace;
-      --f-inter:  'Inter', sans-serif;
-      --r-card:   44px;
-      /* Padding scales from 54px (≈780px viewport) → 100px (1440px viewport) */
-      --page-pad: clamp(54px, 6.94vw, 100px);
+      /* ---- FAMILIES: two, and a rule ----------------------------------
+         MONO = the research talking about itself: nav links, section pills,
+                card subtitles, card bodies, the quote, cookie category names.
+         SANS = the company talking to you: hero, About, all headings, all
+                buttons, footer, cookie prose.
+         MONO NEVER CARRIES NEGATIVE TRACKING — a monospace's sidebearings are
+         already cut for its 0.6em advance. */
+      --f-sans: 'Epilogue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      --f-mono: 'Fragment Mono', ui-monospace, Menlo, 'Courier New', monospace;
+
+      /* ---- SURFACES, chosen by role ------------------------------------ */
+      --paper:          #e9e9e9;   /* body + masthead */
+      --surface-raised: #f4f4f4;   /* #careers slab — the one lift before the end */
+      --surface-sunken: #dcdcdc;   /* the two light research cards + quote ground */
+      --dark-3:         #323538;   /* in-flow dark content card (.card-writing) */
+      --dark-2:         #202224;   /* display panel (.whatif-dark) */
+      --dark-1:         #000000;   /* terminus: footer, cookie banner */
+
+      /* ---- INK ---------------------------------------------------------- */
+      --ink:             #000000;  /* 17.30:1 on paper */
+      --ink-2:           #535353;  /* 6.34:1 on paper — the one secondary ink */
+      --ink-inv:         #ffffff;
+      --ink-inv-2:       #a0a0a0;  /* 8.03:1 on black */
+      --ink-inv-3:       #8a8a8a;  /* 6.08:1 on black — replaces #686868 (3.77:1, FAIL) */
+      --ink-display-inv: #ececec;  /* display type on dark only. 13.51:1 on --dark-2 */
+
+      /* ---- ACCENT ------------------------------------------------------
+         LIME LAW: interactive fills only. --ink on it, never #fff. Never a
+         rule, hairline, icon, link or focus ring on a light ground (1.07:1 on
+         #f4f4f4). Maximum two placements per page: hero CTA card, Careers button. */
+      --accent:     #d0fd36;
+      --accent-ink: #000000;       /* 17.79:1 */
+
+      /* ---- LINES, STROKES, RINGS ---------------------------------------- */
+      --hair:       1px;                    /* structural hairlines */
+      --stroke:     1.5px;                  /* drawn marks: burger, arrow, close X */
+      --focus-w:    2px;                    /* a ring is an a11y value, not a stroke */
+      --line:       rgba(0,0,0,.12);        /* decorative rules on light */
+      --line-strong: rgba(0,0,0,.44);       /* component boundary, 3.17:1 */
+      --line-inv:   rgba(255,255,255,.14);  /* decorative rules on dark */
+      --edge-inv:   rgba(255,255,255,.38);  /* interactive boundary on dark, 3.39:1 */
+
+      /* ---- RADII: four steps, chosen by role ---------------------------- */
+      --r-full:    999px;  /* anything clickable or chip-like */
+      --r-surface:  44px;  /* in-flow content surfaces: cards, panels, slab top */
+      --r-panel:    20px;  /* floating message boxes: hero CTA, cookie banner */
+      --r-micro:     6px;  /* affordances inside a panel: close, checkbox */
+
+      /* ---- ELEVATION: one shadow, used once ----------------------------- */
+      --shadow-float: 0 12px 40px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.22);
+
+      /* ---- MOTION -------------------------------------------------------- */
+      --ease:      cubic-bezier(.16,1,.3,1);
+      --dur-fast:  180ms;
+      --dur-mid:   320ms;
+      --dur-slow:  650ms;
+      --dur-enter: 950ms;
+      --rise:      16px;   /* reveal travel — an institute settles, it does not lurch */
+
+      /* ---- GRID & RAIL (zero wrapper divs) ------------------------------- */
+      --maxw:   1440px;
+      --pad:    clamp(24px, 6.94vw, 100px);
+      --rail:   max(var(--pad), calc(50% - var(--maxw)/2 + var(--pad)));
+      --gutter: clamp(16px, 2.22vw, 32px);
+      --grid:   repeat(12, minmax(0,1fr));
+      --nav-h:  64px;
+
+      /* ---- SPACING LADDER (LAW 1). Base 4. These ten values, nothing else. */
+      --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;  --sp-5: 24px;
+      --sp-6: 32px;  --sp-7: 48px;  --sp-8: 64px;  --sp-9: 96px;  --sp-10: 128px;
+
+      /* ---- THE FOUR RHYTHM RELATIONSHIPS --------------------------------
+         A section gap is declared ONCE, on the TOP of the lower section. */
+      --flow-section: clamp(var(--sp-8), 8.89vw, var(--sp-10)); /* section -> section */
+      --flow-label:   clamp(var(--sp-5), 3.33vw, var(--sp-7));  /* label -> its content */
+      --flow-card:    clamp(var(--sp-6), 4.44vw, var(--sp-8));  /* sibling cards */
+      --flow-slab:    clamp(var(--sp-7), 6.67vw, var(--sp-9));  /* interior pad of slabs */
+
+      /* ---- TYPE SCALE: 1.25 up / 1.125 down from a 20px editorial base ---
+         In rem so a reader's browser font-size preference is honoured. Every
+         rendered size is identical to px at the 16px default. */
+      --t-0:  .75rem;    /* 12 */
+      --t-1:  .875rem;   /* 14 */
+      --t-2:  1rem;      /* 16 */
+      --t-3:  1.125rem;  /* 18 */
+      --t-4:  1.25rem;   /* 20 */
+      --t-5:  1.5625rem; /* 25 */
+      --t-6:  1.9375rem; /* 31 */
+      --t-7:  2.4375rem; /* 39 */
+      --t-8:  3.0625rem; /* 49 */
+      --t-10: 4.75rem;   /* 76 */
+      --t-12: 7.4375rem; /* 119 */
+
+      /* Fluid bindings. Both endpoints are scale steps; all cap at 1440. */
+      --fs-display:   clamp(var(--t-8), 8.26vw, var(--t-12)); /* "What if?"    */
+      --fs-hero:      clamp(var(--t-6), 5.28vw, var(--t-10)); /* h1            */
+      --fs-title:     clamp(var(--t-5), 3.40vw, var(--t-8));  /* card titles   */
+      --fs-h2:        clamp(var(--t-5), 2.71vw, var(--t-7));  /* #careers h2   */
+      --fs-runin:     clamp(var(--t-5), 2.15vw, var(--t-6));  /* .about-name   */
+      --fs-sub:       clamp(var(--t-1), 1.74vw, var(--t-5));  /* card subtitle */
+      --fs-editorial: clamp(var(--t-3), 1.39vw, var(--t-4));  /* About body    */
+      /* These two are CONTAINER-relative, not viewport-relative. That is the
+         fix for the deleted 260px clamp: text and art finally share one scale,
+         and no vw floor can decouple them. */
+      --fs-cardbody:  clamp(var(--t-1), 3.62cqi, var(--t-2));
+      --fs-quote:     clamp(var(--t-1), 2.95cqi, var(--t-2));
+
+      /* ---- LINE-HEIGHT: UNITLESS ONLY. No length may appear in this file. */
+      --lh-display: 1.00;  --lh-hero: 1.05;  --lh-title: 1.08;
+      --lh-head:    1.12;  --lh-runin: 1.10; --lh-label: 1.40;  --lh-body: 1.50;
+
+      /* ---- TRACKING: em only, so it holds at every size.
+         Mono is exempt: always 0. */
+      --ls-display: -.063em; --ls-hero: -.044em; --ls-title: -.036em;
+      --ls-head:    -.032em; --ls-runin: -.028em; --ls-body: -.020em;
+      --ls-ui:      -.012em; --ls-mono:  0;
+
+      /* ---- COMPONENT DIMENSIONS (LAW 2) ---------------------------------- */
+      --card-h:     clamp(480px, 48.61vw, 700px);
+      --card-pad-y: var(--sp-9);
+      --card-pad-x: var(--sp-8);  /* NOT the page rail: the card is already inset by it */
+      --card-text:  39%;          /* of card width — clears every art left edge */
+      --whatif-h:   clamp(320px, 30.56vw, 440px);
+      --btn-h:      48px;
+      --pill-h:     44px;         /* a label is always one step under an action */
+      --tap:        44px;         /* minimum tap target */
+      --scrim-dark:  rgba(0,0,0,.08);
+      --scrim-light: rgba(255,255,255,.12);
+
+      /* ---- FOCUS ---------------------------------------------------------- */
+      --focus: var(--ink);
+      --focus-off: 3px;
     }
 
+    @media (max-width: 767.98px) {
+      :root {
+        --r-surface: 25px;
+        --r-panel:   16px;
+        --nav-h:     56px;
+        --pill-h:    36px;
+        --card-pad-y: var(--sp-6);
+        --card-pad-x: var(--sp-5);
+      }
+    }
+
+    /* =====================================================================
+       GLOBAL
+       ===================================================================== */
     body {
-      background-color: var(--bg);
+      background-color: var(--paper);
       background-image: url('./assets/bg-texture.png');
       background-size: 1024px 1024px;
-      font-family: var(--f-ep);
-      color: #000;
-      overflow-x: hidden;
+      font-family: var(--f-sans);
+      color: var(--ink);
+      overflow-x: clip;               /* `clip` does not create a scroll container */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
 
-    /* ===================== NAV ===================== */
+    /* ONE focus system — the file previously had none outside the cookie banner.
+       --focus flips to white inside dark containers. :where() is zero-specificity,
+       so component radii are never overridden. */
+    :where(a, button, input, [tabindex]):focus-visible {
+      outline: var(--focus-w) solid var(--focus);
+      outline-offset: var(--focus-off);
+      border-radius: var(--r-micro);
+    }
+    :where(footer, .cc-banner, .card-writing, .whatif-dark) { --focus: var(--ink-inv); }
+
+    /* Anchor landings and tabbed-to elements must clear the fixed masthead */
+    #about, #research, #values, #careers,
+    :where(a, button, input, [tabindex]) {
+      scroll-margin-top: calc(var(--nav-h) + var(--sp-5));
+      scroll-margin-bottom: var(--sp-5);
+    }
+    #about:focus, #research:focus, #values:focus, #careers:focus { outline: none; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+    }
+
+    /* THE DITHER FIDELITY RULE — applies to both videos.
+       Both are blue-cast on an otherwise chroma-0 page. grayscale(1) removes hue
+       at zero tonal cost (dot/ground ratio 1.47 -> 1.48, the dither survives).
+       Do NOT add contrast()/brightness(): at 1.9 the dot and ground flatten to
+       one value and the brand signature is gone. */
+    .hero video, .whatif-video { filter: grayscale(1); }
+
+    /* =====================================================================
+       NAV — a masthead that is transparent over the hero artwork and becomes
+       solid paper once the hero has passed. This keeps the full-bleed dither
+       (the strongest brand asset) intact while ending the text-on-text collision
+       that made every section below the hero read as broken.
+       ===================================================================== */
     nav {
       position: fixed;
       inset: 0 0 auto;
       z-index: 999;
+      min-height: var(--nav-h);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 22px var(--page-pad);
+      padding: var(--sp-2) var(--rail);
+      background: transparent;
+      border-bottom: var(--hair) solid transparent;
+      transition: background-color var(--dur-mid) ease, border-color var(--dur-mid) ease;
+    }
+    nav.is-solid,
+    nav:has(.nav-links.is-open) {
+      background-color: var(--paper);
+      background-image: url('./assets/bg-texture.png');
+      background-size: 1024px 1024px;
+      border-bottom-color: var(--line-strong);   /* 3.17:1 — a masthead needs a real edge */
     }
     .nav-logo {
-      font-family: var(--f-ep);
-      font-weight: 700;
-      font-size: 16px;
-      color: #000;
+      font-family: var(--f-sans);
+      font-weight: 600;                 /* was 700 — the file's only 700 */
+      font-size: var(--t-2);
+      line-height: 1;
+      letter-spacing: var(--ls-ui);
+      color: var(--ink);
+      display: inline-flex; align-items: center;
+      min-height: var(--tap);
     }
     .nav-links {
       list-style: none;
       display: flex;
-      gap: 32px;
+      gap: var(--sp-6);
       font-family: var(--f-mono);
-      font-size: 13px;
+      font-size: var(--t-1);
+      letter-spacing: var(--ls-mono);
+      line-height: 1;
     }
-    .nav-links a { color: #000; opacity: 0.75; transition: opacity .2s; }
-    .nav-links a:hover { opacity: 1; }
+    /* opacity:.75 is replaced by real ink: opacity also fades the focus ring. */
+    .nav-links a {
+      color: var(--ink);
+      display: inline-flex; align-items: center;
+      min-height: var(--tap);
+      transition: opacity var(--dur-fast) ease;
+    }
+    .nav-links a:hover { opacity: .6; }
+
     .nav-burger {
       display: none;
-      flex-direction: column;
-      gap: 5px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
+      width: var(--tap); height: var(--tap);   /* was a 28 x 20.5px target */
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: var(--sp-1);
+      background: none; border: none; cursor: pointer; padding: 0;
+      margin-right: calc(var(--sp-1) * -1);    /* keeps the optical edge on the rail */
     }
-    .nav-burger span { display: block; width: 20px; height: 1.5px; background: #000; }
+    .nav-burger span { display: block; width: 20px; height: var(--stroke); background: var(--ink); }
 
-    /* ===================== HERO ===================== */
-    .hero {
-      position: relative;
-      height: 810px;
-      overflow: hidden;
-    }
-    .hero video {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
-    .hero-heading {
-      position: absolute;
-      top: 112px;
-      left: var(--page-pad);
-      z-index: 1;
-      font-family: var(--f-ep);
-      font-weight: 400;
-      font-size: 70px;
-      line-height: 1.15;
-      letter-spacing: -2.8px;
-      color: #000;
-      max-width: 644px;
-    }
-    .hero-cta {
-      position: absolute;
-      right: var(--page-pad);
-      bottom: 84px;
-      z-index: 1;
-      background: rgba(221, 250, 125, 0.95);
-      border: 1px solid rgba(221, 250, 125, 0.95);
-      border-radius: 8px;
-      padding: 28px 29px;
-      width: 398px;
-    }
-    .hero-cta p {
-      font-family: var(--f-ep);          /* match cookie banner text */
-      font-weight: 400;
-      font-size: 16px;
-      line-height: 1.5;
-      letter-spacing: -0.1px;
-      margin-bottom: 28px;
-      max-width: 316px;
-    }
-
-    /* ===================== BUTTONS ===================== */
-    .btn-dark {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: #000;
-      color: #fff;
-      font-family: var(--f-ep);
-      font-weight: 500;
-      font-size: 15px;
-      padding: 14px 24px;
-      border-radius: 8px;          /* match cookie button corners */
-      border: none;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .btn-accent {
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--accent);
-      color: #0c0400;
-      font-family: var(--f-ep);
-      font-weight: 500;
-      font-size: 16px;
-      padding: 13px 26px 13px 22px;
-      border-radius: 73px;
-      border: none;
-      cursor: pointer;
-    }
-    /* Arrow: line + arrowhead via ::after */
-    .btn-accent .arrow-line {
-      position: relative;
-      display: inline-block;
-      width: 22px;
-      height: 1.5px;
-      background: currentColor;
-      flex-shrink: 0;
-    }
-    .btn-accent .arrow-line::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%) rotate(45deg);
-      width: 7px;
-      height: 7px;
-      border-top: 1.5px solid currentColor;
-      border-right: 1.5px solid currentColor;
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 10px 25px;
-      border: 1px solid #000;
-      border-radius: 47px;
-      font-family: var(--f-ep);
-      font-weight: 600;
-      font-size: 17px;
-    }
-
-    /* ===================== ABOUT ===================== */
-    #about {
-      padding: 90px var(--page-pad) 0;
-    }
-    .about-body {
-      margin-top: clamp(80px, 15.7vw, 226px);
-      /* 233px at 1440px, scales down proportionally with viewport */
-      margin-left: clamp(0px, 16.18vw, 233px);
-      margin-right: clamp(0px, 16.18vw, 233px);
-      padding-bottom: clamp(60px, 9.79vw, 141px);
-      font-family: var(--f-ep);
-      font-weight: 500;
-      font-size: 20px;
-      line-height: 30px;
-      letter-spacing: -0.4px;
-      color: #535353;
-    }
-    .about-body p + p { margin-top: 0; }
-    /* Inline name — large semibold, flows with surrounding text */
-    .about-name {
-      font-family: var(--f-ep);
-      font-weight: 600;
-      font-size: 35px;
-      letter-spacing: -1.05px;
-      line-height: 30px;
-      color: #000;
-      vertical-align: baseline;
-    }
-    .c-blue { color: #000; }
-    .c-dim  { color: #535353; }
-    .c-bold { font-family: var(--f-ep); font-weight: 500; font-size: 20px; }
-
-    /* ===================== RESEARCH ===================== */
-    #research {
-      padding: 48px var(--page-pad) 88px;
-    }
-    .cards-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 70px;
-      padding: 0 var(--page-pad);
-    }
-
-    /* --- Base card --- */
-    .card {
-      position: relative;
-      border-radius: var(--r-card);
-      overflow: hidden;
-      display: flex;
-      align-items: stretch;
-    }
-    .card::before, .card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: var(--r-card);
-    }
-    .card::after { background-size: 1024px 1024px; z-index: 1; }
-
-    /* clamp min-height so cards scale with viewport and never clip text at iPad widths */
-    .card-writing             { color: #fff; min-height: clamp(480px, 49.2vw, 708px); }
-    .card-writing::before     { background: var(--dark-1); }
-    .card-writing::after      { background-image: url('./assets/noise-writing.png'); opacity: .22; }
-
-    .card-measurement         { min-height: clamp(480px, 49.4vw, 711px); }
-    .card-measurement::before { background: rgba(190,193,198,.3); }
-    .card-measurement::after  { background-image: url('./assets/noise-measurement.png'); opacity: .14; }
-
-    .card-commerce            { min-height: clamp(460px, 46.4vw, 668px); }
-    .card-commerce::before    { background: rgba(190,193,198,.3); }
-    .card-commerce::after     { background-image: url('./assets/noise-commerce.png'); opacity: .13; }
-
-    /* --- Card inner: unified across all 3 cards (measurement is the reference) --- */
-    .card-inner {
-      position: relative;
-      z-index: 3;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: clamp(50px, 6.25vw, 90px) 0 clamp(48px, 5.97vw, 86px) clamp(52px, 6.94vw, 100px);
-      max-width: 576px;
-    }
-
-    /* --- Decorative images: right edge always flush with card right edge --- */
-    .card-img {
-      position: absolute;
-      pointer-events: none;
-      z-index: 2;
-    }
-    /*
-      Writing: right=0, top=11.6%, w=45.1%, h=86.6%
-      Right edge is flush with card right.
-    */
-    .card-writing .card-img {
-      right: 0; top: 11.6%;
-      width: 45.1%; height: 86.6%;
-      object-fit: cover; object-position: left top;
-      opacity: .84;
-    }
-    /*
-      Measurement: right=0, top=5.8%, w=56.6%, h=88.5%
-      Right edge flush with card right (left=43.4%+w=56.6%=100%).
-    */
-    .card-measurement .card-img {
-      right: 0; top: 5.8%;
-      width: 56.6%; height: 88.5%;
-      object-fit: cover; object-position: left top;
-      opacity: .80;
-    }
-    /*
-      Commerce: right=0, top=28.1%, w=67.8%, h=71.8%
-      Right edge flush. bottom-right radius clips corner.
-    */
-    .card-commerce .card-img {
-      right: 0; top: 28.1%;
-      width: 67.8%; height: 71.8%;
-      object-fit: cover; object-position: left top;
-      opacity: .80;
-      border-bottom-right-radius: var(--r-card);
-    }
-
-    /* --- Card typography --- */
-    .card-title {
-      font-family: var(--f-ep);
-      font-weight: 500;
-      font-size: clamp(28px, 3.19vw, 46px);
-      line-height: 1.1;
-      margin-bottom: 6px;
-    }
-    .card-sub {
-      font-family: var(--f-mono);
-      font-size: clamp(15px, 1.875vw, 27px);
-      line-height: 1.7;
-      letter-spacing: -.54px;
-    }
-    .card-body {
-      font-family: var(--f-mono);
-      font-size: clamp(13px, 1.18vw, 17px);
-      line-height: 1.53;
-      letter-spacing: -.34px;
-      max-width: 440px;
-      margin-top: 48px;
-    }
-
-    /* ===================== WHAT IF ===================== */
-    #values {
-      display: grid;
-      grid-template-columns: 849fr 440fr;
-      gap: 44px;
-      padding: 20px var(--page-pad);
-      margin-top: 150px;
-    }
-    .whatif-dark {
-      position: relative;
-      border-radius: var(--r-card);
-      background: var(--dark-2);
-      overflow: hidden;
-      min-height: 440px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .whatif-dark::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: url('./assets/noise-whatif.png');
-      background-size: 1024px 1024px;
-      opacity: .39;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .whatif-text {
-      position: relative;
-      z-index: 2;
-      font-family: var(--f-ep);
-      font-weight: 400;
-      font-size: 126px;
-      color: #ececec;
-      letter-spacing: -7.98px;
-      line-height: 1;
-      white-space: nowrap;
-      user-select: none;
-    }
-    .whatif-text .qm { font-family: var(--f-inter); font-size: 130px; }
-
-    /* Quote card: video background */
-    .whatif-quote {
-      position: relative;
-      border-radius: var(--r-card);
-      min-height: 440px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 48px;
-      background: #202224;
-    }
-    .whatif-video {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      opacity: .85;
-    }
-    .whatif-quote-text {
-      position: relative;
-      z-index: 2;
-      font-family: var(--f-mono);
-      font-size: 19px;
-      line-height: 1.321;
-      letter-spacing: -.57px;
-      text-align: center;
-      color: #000;
-      max-width: 296px;
-    }
-
-    /* ===================== CTA ===================== */
-    #careers {
-      margin-top: 90px;
-      background: #f4f4f4;
-      border-top-left-radius: var(--r-card);
-      padding: 90px 0 77px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 46px;
-      text-align: center;
-    }
-    #careers h2 {
-      font-family: var(--f-ep);
-      font-weight: 400;
-      font-size: 45px;
-    }
-
-    /* ===================== FOOTER ===================== */
-    footer {
-      background: #000;
-      color: #fff;
-      padding: 87px 194px 60px 157px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    .footer-brand-name { font-family: var(--f-ep); font-weight: 600; font-size: 17px; margin-bottom: 18px; }
-    .footer-brand-sub  { font-family: var(--f-inter); font-size: 17px; line-height: 1.305; color: var(--gray); }
-    .footer-copy       { font-family: var(--f-ep); font-size: 15px; color: var(--muted); margin-top: 48px; }
-    .footer-nav {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      font-family: var(--f-inter);
-      font-size: 17px;
-    }
-    .footer-nav a { color: var(--gray); transition: color .2s; }
-    .footer-nav a:hover { color: #fff; }
-
-    /* ===================== SCROLL ANIMATIONS ===================== */
-    [data-reveal] {
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: var(--reveal-delay, 0ms);
-    }
-    [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
-    /* Slower, gentler fade-in for the hero CTA (matches the cookie banner feel) */
-    .hero-cta[data-reveal] {
-      transition-duration: 0.95s, 0.95s;
-    }
-
-    /* Hero heading — word-by-word staggered fade-in (JS wraps each word in .hero-word) */
-    .hero-heading--stagger { opacity: 0; }          /* hidden until JS splits it (no flash) */
-    .hero-heading--stagger.is-split { opacity: 1; } /* container shows; words still hidden */
-    .hero-word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(0.42em);
-      transition: opacity .9s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform .9s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: var(--w-delay, 0ms);
-      will-change: opacity, transform;
-    }
-    .hero-heading--stagger.is-visible .hero-word {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .hero-heading--stagger { opacity: 1; }
-      .hero-word { transition: none; opacity: 1; transform: none; }
-    }
-
-    /* Measurement + Commerce: snap text width narrow at 1365px so it clears the image */
-    @media (min-width: 769px) and (max-width: 1365px) {
-      .card-measurement .card-body,
-      .card-commerce .card-body {
-        max-width: 260px;
-      }
-    }
-
-    /* ===================== MOBILE (iPhone — rebuilt from Figma 33:47) ===================== */
-    @media (max-width: 768px) {
-      :root { --r-card: 25px; --page-pad: 19px; }
-
-      /* Nav */
-      nav { padding: 20px var(--page-pad); }
+    @media (max-width: 767.98px) {
       .nav-links { display: none; }
       .nav-burger { display: flex; }
-
-      /* Hero */
-      .hero { height: 560px; }
-      .hero-heading {
-        top: 80px; left: var(--page-pad);
-        font-size: 33px; letter-spacing: -1.32px; max-width: 290px;
+      .nav-links.is-open {
+        display: flex;
+        flex-direction: column;
+        position: absolute; top: 100%; left: 0; right: 0; z-index: 998;
+        background-color: var(--paper);
+        background-image: url('./assets/bg-texture.png');
+        background-size: 1024px 1024px;
+        border-bottom: var(--hair) solid var(--line-strong);
+        padding: var(--sp-2) var(--rail) var(--sp-5);
+        gap: var(--sp-2);
+        font-size: var(--t-2);
       }
-      .hero-cta { display: none; }
-
-      /* About */
-      #about { padding: 40px var(--page-pad) 0; }
-      .about-body {
-        margin-top: 56px;
-        margin-left: 0;
-        margin-right: 0;
-        padding-bottom: 48px;
-        font-size: 15px;
-        line-height: 24px;
-        letter-spacing: -0.3px;
-      }
-      .about-body p + p { margin-top: 0; }
-      .about-name { font-size: 22px; letter-spacing: -.66px; line-height: 26px; }
-      .c-bold { font-size: 15px; }
-
-      /* Research label */
-      #research { padding: 28px var(--page-pad) 60px; }
-      .pill { font-size: 14px; padding: 8px 20px; }
-
-      /* Cards wrap */
-      .cards-wrap { padding: 0 var(--page-pad); gap: 60px; }
-
-      /*
-        ── Mobile card layout (Figma iPhone 33:47) ──
-        Each card: title+subtitle at top, decorative image in middle,
-        body text at bottom. Image is absolute, text via card-inner flex.
-      */
-
-      /* Reset desktop constraints */
-      .card-writing, .card-measurement, .card-commerce {
-        min-height: 0;
-      }
-
-      /* Mobile card: elongated with title at top, body pushed to bottom */
-      .card-writing, .card-measurement, .card-commerce { min-height: 480px; }
-
-      .card-inner {
-        padding: 32px 25px 36px 25px !important;
-        max-width: 100% !important;
-        width: 100%;
-        min-height: 480px !important;
-        justify-content: space-between !important;
-      }
-
-      .card-title { font-size: 22px; line-height: 1.15; margin-bottom: 4px; }
-      .card-sub   { font-size: 13px; line-height: 1.5; letter-spacing: -.26px; }
-      .card-body  {
-        font-size: 14px; line-height: 1.6;
-        letter-spacing: -.28px; max-width: 100%;
-        margin-top: 0;
-        padding-top: 0;
-      }
-
-      /* Mobile images — explicitly override all desktop top/left/right/bottom */
-      .card-writing .card-img {
-        display: block; position: absolute;
-        right: 0; top: 0; left: auto; bottom: auto;
-        transform: none;
-        width: 80%; height: auto;
-        object-fit: unset;
-        opacity: 0.26; border-radius: 0;
-      }
-      .card-measurement .card-img {
-        display: block; position: absolute;
-        right: 0; top: 0; left: auto; bottom: auto;
-        transform: none;
-        width: 95%; height: auto;
-        object-fit: unset;
-        opacity: 0.26; border-radius: 0;
-      }
-      .card-commerce .card-img {
-        display: block; position: absolute;
-        right: 0; bottom: 0; top: auto; left: auto;
-        transform: none;
-        width: 170%; height: auto;
-        object-fit: unset;
-        opacity: 0.26; border-radius: 0;
-      }
-      /* Commerce: reduce vertical space to ~2/3 of other cards */
-      .card-commerce .card-inner {
-        min-height: 320px !important;
-      }
-
-      /* What if */
-      #values {
-        grid-template-columns: 1fr;
-        padding: 16px var(--page-pad);
-        gap: 16px;
-        margin-top: 60px;
-      }
-      .whatif-dark { min-height: 150px; }
-      .whatif-text { font-size: 50px; letter-spacing: -5px; }
-      .whatif-text .qm { font-size: 52px; }
-      .whatif-quote { min-height: 280px; padding: 36px 24px; }
-      .whatif-quote-text { font-size: 15px; max-width: 240px; }
-
-      /* CTA */
-      #careers {
-        margin-top: 40px;
-        border-top-left-radius: 25px;
-        border-top-right-radius: 25px;
-        padding: 48px 24px 72px;
-        gap: 28px;
-      }
-      #careers h2 { font-size: 22px; }
-
-      /* Footer */
-      footer { flex-direction: column; padding: 33px 21px 48px; gap: 28px; }
-      .footer-brand-name { font-size: 13px; }
-      .footer-brand-sub  { font-size: 12px; }
-      .footer-copy       { font-size: 11px; margin-top: 16px; }
-      /* Keep only the Cookies link on mobile so consent stays withdrawable on phones */
-      .footer-nav                              { display: flex; gap: 0; }
-      .footer-nav li:not(.footer-nav__cookies) { display: none; }
-      .footer-nav__cookies a                   { font-size: 13px; }
+      .nav-links.is-open a { min-height: var(--tap); }
     }
 
     /* =====================================================================
-       COOKIE CONSENT — self-contained, no library. Reuses site tokens
-       (--f-ep Epilogue, --f-mono Fragment Mono). Black/white to match the
-       reference banner. position:fixed => out of flow, ~0 layout shift.
-       Banner is [hidden] by default; the controller script at the end of
-       <body> reveals it ONLY when there is no valid decision, so returning
-       visitors never see a flash.
+       HERO — the video stays full-bleed to the top of the page and runs under
+       the transparent masthead. Three grid rows with a 1fr spacer replace the
+       hard-coded 810px height and both absolutely-positioned children, so the
+       heading and the CTA cannot collide at any viewport height.
+       ===================================================================== */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: var(--grid);
+      grid-template-rows: auto 1fr auto;
+      column-gap: var(--gutter);
+      padding: calc(var(--nav-h) + var(--sp-6)) var(--rail) var(--sp-8);
+      min-height: clamp(560px, 100svh, 880px);
+    }
+    .hero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+    .hero-heading {
+      grid-row: 1; grid-column: 1 / span 7; z-index: 1;
+      font-weight: 400;
+      font-size: var(--fs-hero);
+      line-height: var(--lh-hero);
+      letter-spacing: var(--ls-hero);
+      color: var(--ink);
+      text-wrap: balance;
+    }
+    .hero-cta {
+      grid-row: 3; grid-column: 9 / -1;
+      justify-self: end; align-self: end; z-index: 1;
+      width: 100%;
+      background: var(--accent);        /* was rgba(221,250,125,.95) — a DIFFERENT lime */
+      border-radius: var(--r-panel);
+      padding: var(--sp-6);
+    }
+    .hero-cta p {
+      font-size: var(--t-2);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-ui);
+      margin-bottom: var(--sp-5);
+    }
+    /* The lime card is now the dimensional twin of the cookie banner at the
+       opposite diagonal corner: same --r-panel, both floating message boxes. */
+
+    @media (max-width: 1023.98px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-heading { grid-column: 1 / -1; }
+      .hero-cta {
+        grid-column: 1 / -1; justify-self: stretch; width: auto;
+        margin-top: var(--flow-label);
+      }
+    }
+
+    /* =====================================================================
+       BUTTONS & PILLS
+       One base, one height, two variants. The same label "Get In Touch" was
+       previously two unrelated components differing in radius (8 vs 73), size,
+       fill logic and arrow implementation. They now differ in exactly two
+       colours, for a stated reason:
+       PRIMARY IS --accent ON NEUTRAL SURFACES AND --ink ON ACCENT SURFACES.
+       Never accent-on-accent.
+       ===================================================================== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: var(--btn-h);           /* min-, not fixed: survives 200% text scale */
+      padding: var(--sp-3) var(--sp-5);
+      gap: var(--sp-3);
+      border-radius: var(--r-full);
+      border: var(--hair) solid transparent;
+      font-family: var(--f-sans); font-weight: 500;
+      font-size: var(--t-2); line-height: 1; letter-spacing: var(--ls-ui);
+      cursor: pointer;
+      transition: box-shadow var(--dur-fast) ease, transform 50ms ease;
+    }
+    .btn--primary   { background: var(--accent); color: var(--accent-ink); border-color: var(--ink); }
+    .btn--on-accent { background: var(--dark-1); color: var(--ink-inv);    border-color: var(--dark-1); }
+    .btn:hover            { box-shadow: inset 0 0 0 999px var(--scrim-dark); }
+    .btn--on-accent:hover { box-shadow: inset 0 0 0 999px var(--scrim-light); }
+    .btn:active           { transform: translateY(1px); }
+    /* The lime button carries a 1px --ink border because #d0fd36 is 1.07:1
+       against #f4f4f4 — without it the button has no boundary at all. The
+       border is --ink, never lime: the lime law forbids lime as a hairline. */
+
+    .btn .arrow-line {
+      position: relative; display: inline-block;
+      width: 22px; height: var(--stroke); background: currentColor; flex-shrink: 0;
+    }
+    .btn .arrow-line::after {
+      content: ''; position: absolute; right: 0; top: 50%;
+      transform: translateY(-50%) rotate(45deg);
+      width: 7px; height: 7px;
+      border-top: var(--stroke) solid currentColor;
+      border-right: var(--stroke) solid currentColor;
+    }
+
+    .pill {
+      display: inline-flex; align-items: center;
+      min-height: var(--pill-h);
+      padding: var(--sp-2) var(--sp-5);
+      border: var(--hair) solid var(--ink);
+      border-radius: var(--r-full);
+      font-family: var(--f-mono);        /* the one thing on the page that IS a label
+                                            now uses the label face */
+      font-weight: 400;
+      font-size: var(--t-1);
+      line-height: 1;
+      letter-spacing: var(--ls-mono);
+    }
+    /* 47px and 73px were two independent numeric guesses at "pill"; both are now
+       --r-full. The pill stays one step shorter than a button (44 vs 48) so a
+       marker never outweighs an action. */
+
+    /* =====================================================================
+       ABOUT
+       The orphaned label and the arbitrary 233px indent were the same bug: the
+       paragraph was indented for no reason a reader could see. Both now sit on
+       one grid row, so the indent becomes structural — the prose starts there
+       BECAUSE the label lives there.
+       ===================================================================== */
+    #about {
+      display: grid;
+      grid-template-columns: var(--grid);
+      column-gap: var(--gutter);
+      padding: var(--flow-section) var(--rail) 0;
+    }
+    #about .pill {
+      grid-column: 1 / span 3;
+      justify-self: start;   /* grid items are blockified; without this the pill
+                                stretches to the full 3-column track */
+      align-self: start;
+      margin-top: .4em;      /* optical: aligns the pill to the prose x-line */
+    }
+    .about-body {
+      grid-column: 4 / span 7;
+      font-weight: 500;
+      font-size: var(--fs-editorial);
+      line-height: var(--lh-body);  /* UNITLESS. Was `30px` — a LENGTH, which
+                                       inherits as an absolute 30px into every
+                                       inline child and crushed the run-in name
+                                       to 0.857 leading. */
+      letter-spacing: var(--ls-body);
+      color: var(--ink-2);          /* 6.34:1 */
+      text-wrap: pretty;
+    }
+    .about-body p { margin: 0; }
+    .about-body p + p { margin-top: 1.5em; }   /* reproduces the old <p>&nbsp;</p> gap */
+    .about-name {
+      font-weight: 600;
+      font-size: var(--fs-runin);
+      line-height: var(--lh-runin);
+      letter-spacing: var(--ls-runin);
+      color: var(--ink);
+    }
+    /* Emphasis stops being colour-only (WCAG 1.4.1): it now carries a weight
+       step, so it survives greyscale and forced-colours mode. */
+    .em { font-weight: 600; color: var(--ink); }
+
+    @media (max-width: 1023.98px) {
+      #about { grid-template-columns: 1fr; }
+      #about .pill { grid-column: 1 / -1; margin: 0 0 var(--flow-label); }
+      .about-body { grid-column: 1 / -1; }
+    }
+
+    /* =====================================================================
+       RESEARCH LABEL + THE THREE CARDS
+
+       ROOT CAUSE of the deleted 260px clamp: the text column was sized in px
+       while the images are sized in % of the card, so the two scales inevitably
+       crossed. 260 + 88.8px padding = 349px, exactly where the commerce image's
+       left edge landed at 1280 — it was a collision hack, not a measure
+       decision, and it produced 29.8 characters per line.
+
+       FIX, IN THREE PARTS:
+       (a) the text column is a PERCENTAGE of the card, so it shares a scale
+           with the art;
+       (b) the body is sized in cqi against that column, so no vw floor can
+           decouple type size from column width;
+       (c) NO TEXT EVER CROSSES ARTWORK — enforced by geometry, not by masking.
+           Art left edges as % of card: writing 54.9%, measurement 43.4%,
+           commerce 32.2%. A 39% text column clears writing and measurement.
+           Commerce alone broke the budget, so its box narrows to 58% and
+           switches to object-fit:contain — the whole artwork is preserved,
+           uncropped, still flush right, still clipped by the corner radius.
+       ===================================================================== */
+    #research { padding: var(--flow-section) var(--rail) var(--flow-label); }
+    .cards-wrap {
+      display: flex; flex-direction: column;
+      gap: var(--flow-card);
+      padding: 0 var(--rail);
+    }
+
+    .card {
+      position: relative;
+      border-radius: var(--r-surface);
+      overflow: hidden;
+      display: flex; align-items: stretch;
+      min-height: var(--card-h);
+    }
+    .card::before, .card::after {
+      content: ''; position: absolute; inset: 0;
+      pointer-events: none; border-radius: var(--r-surface);
+    }
+    .card::after { background-size: 1024px 1024px; z-index: 1; }  /* noise sits BENEATH the art */
+
+    /* Three near-identical min-height clamps collapse to one token + one exception */
+    .card-commerce { min-height: calc(var(--card-h) - var(--sp-7)); }
+
+    .card-writing { color: var(--ink-inv); }
+    .card-writing::before     { background: var(--dark-3); }
+    .card-writing::after      { background-image: url('./assets/noise-writing.png'); opacity: .22; }
+    .card-measurement::before { background: var(--surface-sunken); }
+    .card-measurement::after  { background-image: url('./assets/noise-measurement.png'); opacity: .14; }
+    .card-commerce::before    { background: var(--surface-sunken); }
+    .card-commerce::after     { background-image: url('./assets/noise-commerce.png'); opacity: .13; }
+    /* was rgba(190,193,198,.3) — chroma 8, and only grey by accident of the paper behind it */
+
+    /* --- DITHER FIDELITY: opacity 1, no colour wash, noise underneath ------
+       The images previously ran at .84/.80/.80 over a grey wash — two veils
+       stacked on the single strongest brand asset, which is why the blacks
+       read as mid-grey mush. Dither is a binary medium; its authority comes
+       from pure black against pure white. */
+    .card-img { position: absolute; pointer-events: none; z-index: 2; opacity: 1; }
+    .card-writing .card-img {
+      right: 0; top: 11.6%; width: 45.1%; height: 86.6%;
+      object-fit: cover; object-position: left top;
+    }
+    .card-measurement .card-img {
+      right: 0; top: 5.8%; width: 56.6%; height: 88.5%;
+      object-fit: cover; object-position: left top;
+    }
+    .card-commerce .card-img {
+      right: 0; top: 28.1%; width: 58%; height: 71.8%;   /* was 67.8% — the only geometry change */
+      object-fit: contain; object-position: right bottom;
+      border-bottom-right-radius: var(--r-surface);
+    }
+
+    .card-inner {
+      position: relative; z-index: 3;
+      container-type: inline-size;   /* the container --fs-cardbody resolves against */
+      display: flex; flex-direction: column; justify-content: space-between;
+      width: var(--card-text);
+      padding: var(--card-pad-y) 0 var(--card-pad-y) var(--card-pad-x);
+    }
+    /* --card-pad-x is --sp-8, NOT the page rail: the card is already inset by
+       --rail, so the old clamp(52px,6.94vw,100px) put text at 2x the rail. */
+
+    .card-title {
+      font-weight: 500;
+      font-size: var(--fs-title);
+      line-height: var(--lh-title);
+      letter-spacing: var(--ls-title);
+      margin-bottom: var(--sp-2);
+      text-wrap: balance;
+    }
+    .card-sub {
+      font-family: var(--f-mono);
+      font-size: var(--fs-sub);
+      line-height: var(--lh-label);
+      letter-spacing: var(--ls-mono);
+    }
+    .card-body {
+      font-family: var(--f-mono);
+      font-size: var(--fs-cardbody);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-mono);
+      margin-top: var(--sp-7);
+    }
+    /* The negative tracking on every mono rule is deleted: a monospace's
+       sidebearings are already cut for its 0.6em advance, so pulling -0.02em
+       out of every slot crowds m/w while gapping i/l — the inverse of tracking. */
+
+    /* --- Stacked card, 0 to 899.98px. The horizontal editorial card is the
+       second-strongest brand asset after the dither, and the cqi/percentage
+       system keeps it valid deep into the tablet range, so it is held as long
+       as the 39% column can still carry a readable measure. */
+    @media (max-width: 899.98px) {
+      .card { flex-direction: column; min-height: 0; }
+      .card-commerce { min-height: 0; }
+      .card-inner {
+        order: 2; width: 100%;
+        padding: var(--card-pad-y) var(--card-pad-x);
+        container-type: normal;
+      }
+      .card-img {
+        position: relative; order: 1;
+        right: auto; left: auto; top: auto; bottom: auto;
+        width: 100%; height: clamp(240px, 34vw, 420px);
+        object-fit: cover; object-position: center;
+        border-bottom-right-radius: 0;
+      }
+      .card-commerce .card-img { width: 100%; object-fit: cover; object-position: center bottom; }
+      .card-body { font-size: var(--t-1); margin-top: var(--sp-6); }
+    }
+
+    /* =====================================================================
+       WHAT IF?
+       The quote card declared background:#202224 with color:#000 = 1.32:1. The
+       only thing making it readable was a video painted on top, so a 404, a
+       slow buffer, data-saver or blocked autoplay rendered it invisible. The
+       ground is now light, which guarantees the type reads with or without the
+       video — no plate, no scrim, the poetry left alone.
+       ===================================================================== */
+    #values {
+      display: grid;
+      grid-template-columns: var(--grid);
+      column-gap: var(--gutter);
+      padding: var(--flow-section) var(--rail) 0;
+    }
+    .whatif-dark {
+      grid-column: 1 / span 7;
+      position: relative; overflow: hidden;
+      border-radius: var(--r-surface);
+      background: var(--dark-2);
+      min-height: var(--whatif-h);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .whatif-dark::after {
+      content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: url('./assets/noise-whatif.png') 0 0 / 1024px 1024px;
+      opacity: .39;
+    }
+    .whatif-text {
+      position: relative; z-index: 2;
+      font-weight: 400;
+      font-size: var(--fs-display);
+      line-height: var(--lh-display);
+      letter-spacing: var(--ls-display);
+      color: var(--ink-display-inv);   /* 13.51:1 on --dark-2 */
+      white-space: nowrap;
+      padding-right: .063em;           /* cancels the trailing tracking advance so the
+                                          nowrap string is optically centred */
+    }
+    /* The "?" previously swapped Inter in mid-word at a 3.2% size bump — a
+       third family for one glyph, and a visual no-op. Institutions do not
+       change typeface inside a word. */
+    .whatif-text .qm { font-family: inherit; font-size: 1em; font-weight: 400; }
+
+    .whatif-quote {
+      grid-column: 8 / -1;
+      container-type: inline-size;
+      position: relative; overflow: hidden;
+      border-radius: var(--r-surface);
+      min-height: var(--whatif-h);
+      /* Tight enough that the longest authored line (39 mono characters) sets
+         unwrapped — the <br> set in the markup is a composition, not a hint. */
+      padding: clamp(var(--sp-4), 1.5vw, var(--sp-6));
+      background: var(--surface-sunken);  /* readable ground if the video never paints */
+      display: flex; align-items: center; justify-content: center;
+    }
+    .whatif-video {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 1;                        /* was .85 — dither fidelity */
+    }
+    .whatif-quote-text {
+      position: relative; z-index: 2;
+      font-family: var(--f-mono);
+      font-size: var(--fs-quote);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-mono);
+      text-align: center;
+      color: var(--ink);
+    }
+
+    @media (max-width: 1023.98px) {
+      #values { grid-template-columns: 1fr; row-gap: var(--flow-card); }
+      .whatif-dark, .whatif-quote { grid-column: 1 / -1; }
+      .whatif-dark { min-height: clamp(200px, 26vw, 320px); }
+    }
+
+    /* =====================================================================
+       CAREERS — the page's one wide horizontal breath before the terminus.
+       BOTH top corners take --r-surface; mobile already did this, so the
+       desktop single-corner rule read as an unfinished edit. The slab gains
+       the horizontal padding it never had (`90px 0 77px`), which let the h2
+       run to the viewport edge at narrow widths.
+       ===================================================================== */
+    #careers {
+      margin-top: var(--flow-section);
+      background: var(--surface-raised);
+      border-top-left-radius: var(--r-surface);
+      border-top-right-radius: var(--r-surface);
+      padding: var(--flow-slab) var(--rail);
+      display: flex; flex-direction: column; align-items: center;
+      gap: var(--sp-7);
+      text-align: center;
+    }
+    #careers h2 {
+      font-weight: 400;
+      font-size: var(--fs-h2);
+      line-height: var(--lh-head);
+      letter-spacing: var(--ls-head);
+      text-wrap: balance;
+    }
+    /* The h2 previously nearly tied the card titles, flattening the hierarchy.
+       The research cards carry the substance; the careers prompt is a
+       transition, so it sits one scale step below them. */
+
+    @media (max-width: 767.98px) { #careers { gap: var(--sp-6); } }
+
+    /* =====================================================================
+       FOOTER — `padding: 87px 194px 60px 157px` was the worst alignment on the
+       page: asymmetric left-to-right for no reason, and 57/94px off the rail
+       every section above it uses. On the grid the brand block terminates at
+       column 5 and the nav sits at 9-10, closing the right hang the About
+       section opens.
+       ===================================================================== */
+    footer {
+      background: var(--dark-1);
+      color: var(--ink-inv);
+      display: grid;
+      grid-template-columns: var(--grid);
+      column-gap: var(--gutter);
+      padding: var(--flow-slab) var(--rail) var(--sp-8);
+    }
+    footer > div { grid-column: 1 / span 5; }
+    .footer-brand-name {
+      font-family: var(--f-sans); font-weight: 600;
+      font-size: var(--t-2); letter-spacing: var(--ls-ui);
+      margin-bottom: var(--sp-4);
+    }
+    .footer-brand-sub {
+      font-family: var(--f-sans);      /* was Inter */
+      font-weight: 400; font-size: var(--t-2);
+      line-height: var(--lh-body); letter-spacing: var(--ls-ui);
+      color: var(--ink-inv-2);         /* 8.03:1 */
+    }
+    .footer-copy {
+      font-family: var(--f-sans); font-size: var(--t-1);
+      line-height: var(--lh-label);
+      color: var(--ink-inv-3);         /* 6.08:1 — was #686868 at 3.77:1, the file's
+                                          one hard WCAG 1.4.3 failure, in the copyright */
+      margin-top: var(--sp-7);
+    }
+    .footer-nav {
+      grid-column: 9 / 11;
+      list-style: none;
+      display: flex; flex-direction: column;
+      font-family: var(--f-sans);      /* was Inter */
+      font-size: var(--t-2); letter-spacing: var(--ls-ui);
+    }
+    .footer-nav a {
+      color: var(--ink-inv-2);
+      display: inline-flex; align-items: center;
+      min-height: var(--tap);
+      transition: color var(--dur-fast) ease;
+    }
+    .footer-nav a:hover { color: var(--ink-inv); }
+
+    @media (max-width: 767.98px) {
+      footer {
+        grid-template-columns: 1fr; row-gap: var(--sp-6);
+        padding: var(--flow-slab) var(--rail) var(--sp-7);
+      }
+      footer > div, .footer-nav { grid-column: 1 / -1; }
+      .footer-copy { margin-top: var(--sp-4); }
+      /* Keep only the Cookies link on mobile so consent stays withdrawable on phones */
+      .footer-nav li:not(.footer-nav__cookies) { display: none; }
+    }
+
+    /* =====================================================================
+       SCROLL ANIMATIONS
+       The reveal is gated behind html.js so that if the CDN script fails the
+       page renders its content instead of leaving ~80% of the text at opacity 0.
+       ===================================================================== */
+    .js [data-reveal] {
+      opacity: 0;
+      transform: translateY(var(--rise));
+      transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    .js [data-reveal].is-visible { opacity: 1; transform: none; }
+    .js .hero-cta[data-reveal] { transition-duration: var(--dur-enter), var(--dur-enter); }
+
+    /* Hero heading — word-by-word staggered fade-in (JS wraps each word) */
+    .js .hero-heading--stagger { opacity: 0; }
+    .js .hero-heading--stagger.is-split { opacity: 1; }
+    .hero-word {
+      display: inline-block;
+      opacity: 1;
+    }
+    .js .hero-word {
+      opacity: 0;
+      transform: translateY(0.42em);
+      transition: opacity var(--dur-enter) var(--ease), transform var(--dur-enter) var(--ease);
+      transition-delay: var(--w-delay, 0ms);
+      will-change: opacity, transform;
+    }
+    .js .hero-heading--stagger.is-visible .hero-word { opacity: 1; transform: none; }
+
+    /* =====================================================================
+       COOKIE CONSENT
+       Compliance behaviour is untouched: two stacked full-width buttons of
+       identical height, radius, weight and size, separated by --sp-4; only the
+       fill differs. Both take the same class, so any weight change applies to
+       both simultaneously and equal prominence is structurally preserved.
+       It keeps the file's only shadow, because it is the only element that
+       interrupts you.
        ===================================================================== */
     .cc-banner[hidden] { display: none; }
 
     .cc-banner {
       position: fixed;
-      left: 24px;
-      bottom: 24px;
-      z-index: 1001;                 /* nav 999, re-open btn 1000, banner above both */
-      width: min(420px, calc(100vw - 48px));
-      padding: 32px;
-      background: #000;
-      color: #fff;
-      border-radius: 5px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.22);
-      font-family: var(--f-ep);
-      -webkit-font-smoothing: antialiased;
-      animation: ccIn .95s cubic-bezier(0.16, 1, 0.3, 1) both;
+      left: var(--sp-5); bottom: var(--sp-5);
+      z-index: 1001;
+      width: min(420px, calc(100vw - var(--sp-7)));
+      max-height: calc(100dvh - var(--sp-8));   /* reachable at 200% zoom */
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: var(--sp-6);
+      background: var(--dark-1);
+      color: var(--ink-inv);
+      color-scheme: dark;                       /* so the UA draws dark control chrome */
+      border-radius: var(--r-panel);            /* was 5px — now the declared twin of the
+                                                   hero CTA: the page's two floating
+                                                   message boxes, opposite corners */
+      box-shadow: var(--shadow-float);
+      font-family: var(--f-sans);
+      animation: ccIn var(--dur-enter) var(--ease) both;
     }
-
     .cc-banner__text {
-      margin: 0 40px 0 0;
-      font-weight: 400;
-      font-size: 16px;
-      line-height: 1.5;
-      letter-spacing: -0.1px;
-      color: #fff;
+      margin: 0 var(--sp-7) 0 0;
+      font-weight: 400; font-size: var(--t-2);
+      line-height: var(--lh-body); letter-spacing: var(--ls-ui);
+      color: var(--ink-inv);
     }
-
-    /* "Cookies settings" disclosure toggle */
     .cc-banner__settings {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 0;
-      background: none;
-      border: none;
-      font-family: var(--f-ep);
-      font-weight: 500;
-      font-size: 16px;
-      color: #fff;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      text-decoration-thickness: 1px;
-      cursor: pointer;
-      transition: opacity .2s ease;
+      display: inline-flex; align-items: center;
+      min-height: var(--tap);
+      margin-top: var(--sp-2);
+      padding: 0; background: none; border: none;
+      font-family: var(--f-sans); font-weight: 500; font-size: var(--t-2);
+      color: var(--ink-inv);
+      text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+      cursor: pointer; transition: opacity var(--dur-fast) ease;
     }
     .cc-banner__settings:hover { opacity: .7; }
 
-    /* Top-right close */
     .cc-banner__close {
-      position: absolute;
-      top: 20px; right: 20px;
-      width: 24px; height: 24px;
+      position: absolute; top: var(--sp-4); right: var(--sp-4);
+      width: var(--tap); height: var(--tap);   /* was 24 x 24 */
       display: inline-flex; align-items: center; justify-content: center;
       padding: 0; background: none; border: none;
-      color: rgba(255,255,255,.7);
-      cursor: pointer; border-radius: 3px;
-      transition: color .2s ease, background .2s ease;
+      color: rgba(255,255,255,.7); cursor: pointer;
+      border-radius: var(--r-micro);
+      transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
     }
     .cc-banner__close svg { display: block; }
-    .cc-banner__close:hover  { color: #fff; background: rgba(255,255,255,.08); }
+    .cc-banner__close:hover  { color: var(--ink-inv); background: rgba(255,255,255,.08); }
     .cc-banner__close:active { background: rgba(255,255,255,.14); }
 
-    /* Category panel (progressive disclosure, same element) */
-    .cc-panel { margin-top: 20px; }
+    .cc-panel { margin-top: var(--sp-5); }
     .cc-panel[hidden] { display: none; }
     .cc-cat {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: start;
-      column-gap: 12px;
-      padding: 14px 0;
-      border-top: 1px solid rgba(255,255,255,.14);
+      display: grid; grid-template-columns: 1fr auto; align-items: start;
+      column-gap: var(--sp-3); padding: var(--sp-4) 0;
+      border-top: var(--hair) solid var(--line-inv);
+      cursor: pointer;
     }
-    .cc-cat__head { display: flex; align-items: baseline; gap: 10px; }
+    .cc-cat__head { display: flex; align-items: baseline; gap: var(--sp-2); }
     .cc-cat__name {
-      font-family: var(--f-mono);
-      font-size: 13px;
-      letter-spacing: -0.2px;
-      color: #fff;
-      text-transform: uppercase;
+      font-family: var(--f-mono); font-size: var(--t-1);
+      letter-spacing: var(--ls-mono);
+      color: var(--ink-inv);
     }
     .cc-cat__state {
-      font-family: var(--f-mono);
-      font-size: 11px;
-      color: rgba(255,255,255,.55);
+      font-family: var(--f-mono); font-size: var(--t-1);
+      letter-spacing: var(--ls-mono); color: rgba(255,255,255,.62);
     }
     .cc-cat__desc {
-      grid-column: 1 / 2;
-      margin-top: 4px;
-      font-size: 13px;
-      line-height: 1.45;
+      grid-column: 1 / 2; margin-top: var(--sp-1);
+      font-size: var(--t-1); line-height: var(--lh-body);
       color: rgba(255,255,255,.72);
     }
     .cc-cat__toggle {
-      grid-row: 1 / 3;
-      grid-column: 2;
-      width: 18px; height: 18px;
-      accent-color: #fff;             /* neutral (not lime) */
-      /* explicit ring so the unchecked box stays visible on pure black */
-      box-shadow: 0 0 0 1px rgba(255,255,255,.45);
-      border-radius: 3px;
+      grid-row: 1 / 3; grid-column: 2;
+      align-self: center;
+      width: 24px; height: 24px;
+      accent-color: var(--ink-inv);   /* NEUTRAL, never lime: the lime budget is spent,
+                                         and lime may never brand a consent surface */
+      box-shadow: 0 0 0 var(--hair) var(--edge-inv);
       cursor: pointer;
     }
     .cc-cat__toggle:disabled { cursor: not-allowed; opacity: .6; }
 
-    /* Action buttons — full width, stacked, EQUALLY prominent (reject == accept) */
     .cc-banner__actions {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 24px;
+      display: flex; flex-direction: column;
+      gap: var(--sp-4); margin-top: var(--sp-5);
     }
+    .cc-save { margin-top: var(--sp-4); }
+
     .cc-banner__btn {
       width: 100%;
+      min-height: var(--btn-h);
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 18px 20px;
-      border-radius: 8px;
-      font-family: var(--f-ep);
-      font-weight: 600;
-      font-size: 16px;
-      line-height: 1;
-      letter-spacing: -0.1px;
+      padding: var(--sp-3) var(--sp-5);
+      border-radius: var(--r-full);              /* was 8px */
+      font-family: var(--f-sans); font-weight: 500;
+      font-size: var(--t-2); line-height: 1; letter-spacing: var(--ls-ui);
       cursor: pointer;
-      transition: background .18s ease, border-color .18s ease, transform .05s ease;
+      transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease, transform 50ms ease;
     }
     .cc-banner__btn:active { transform: translateY(1px); }
-    .cc-save { margin-top: 18px; }
 
-    /* Primary: white fill / black text */
-    .cc-banner__btn--primary {
-      background: #fff; color: #000;
-      border: 1px solid #fff;
-    }
-    .cc-banner__btn--primary:hover  { background: #ececec; border-color: #ececec; }
-    .cc-banner__btn--primary:active { background: #dcdcdc; border-color: #dcdcdc; }
+    .cc-banner__btn--primary { background: var(--ink-inv); color: var(--ink); border: var(--hair) solid var(--ink-inv); }
+    .cc-banner__btn--primary:hover  { background: var(--paper);          border-color: var(--paper); }
+    .cc-banner__btn--primary:active { background: var(--surface-sunken); border-color: var(--surface-sunken); }
 
-    /* Secondary: black fill / white text — same size/weight/radius => equal prominence */
-    .cc-banner__btn--secondary {
-      background: #000; color: #fff;
-      border: 1px solid rgba(255,255,255,.35);
-    }
-    .cc-banner__btn--secondary:hover  { background: #1a1a1a; border-color: rgba(255,255,255,.55); }
-    .cc-banner__btn--secondary:active { background: #242424; border-color: rgba(255,255,255,.7); }
-
-    /* Visible focus ring — light on black, dark on the white primary fill */
-    .cc-banner__btn:focus-visible,
-    .cc-banner__close:focus-visible,
-    .cc-banner__settings:focus-visible,
-    .cc-cat__toggle:focus-visible {
-      outline: 2px solid #fff;
-      outline-offset: 2px;
-    }
-    .cc-banner__btn--primary:focus-visible {
-      outline: 2px solid #000;
-      outline-offset: 2px;
-    }
+    .cc-banner__btn--secondary { background: var(--dark-1); color: var(--ink-inv); border: var(--hair) solid var(--edge-inv); }
+    .cc-banner__btn--secondary:hover  { background: var(--dark-2); border-color: rgba(255,255,255,.55); }
+    .cc-banner__btn--secondary:active { background: #2b2d2f; border-color: rgba(255,255,255,.7); }
+    /* The secondary border was rgba(255,255,255,.35) = exactly 3.01:1, one
+       hundredth above the WCAG 1.4.11 floor. --edge-inv (.38) buys margin at
+       3.39:1. It must never be softened toward --line-inv: that would strip the
+       reject button's only boundary while accept keeps its white fill —
+       precisely the equal-prominence violation the component exists to avoid. */
 
     @keyframes ccIn {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Mobile: full-width bottom sheet */
-    @media (max-width: 768px) {
+    @media (max-width: 767.98px) {
       .cc-banner {
-        left: 12px; right: 12px; bottom: 12px;
-        width: auto; padding: 24px; border-radius: 8px;
+        left: var(--sp-3); right: var(--sp-3); bottom: var(--sp-3);
+        width: auto; padding: var(--sp-5);
       }
-      .cc-banner__text { font-size: 15px; margin-right: 36px; }
-      .cc-banner__btn  { padding: 16px 18px; font-size: 15px; }
-      .cc-banner__close { top: 16px; right: 16px; }
+      .cc-banner__text { margin-right: var(--sp-6); }
     }
 
+    /* =====================================================================
+       MOTION — one block, covering the reveal system, the buttons and the
+       banner. Lenis itself and the two <video> elements are disabled in JS,
+       because CSS cannot pause either one.
+       ===================================================================== */
     @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        transition-delay: 0ms !important;
+        animation-delay: 0ms !important;
+        scroll-behavior: auto !important;
+      }
+      .js [data-reveal] { opacity: 1; transform: none; }
+      .js .hero-heading--stagger { opacity: 1; }
+      .js .hero-word { opacity: 1; transform: none; }
       .cc-banner { animation: none; }
-      .cc-banner__btn:active { transform: none; }
     }
   </style>
 </head>
-<body>
+<body id="top">
 
   <!-- ========== NAV ========== -->
-  <nav>
-    <a href="#" class="nav-logo">Nichido Solutions Inc.</a>
-    <ul class="nav-links">
+  <nav aria-label="Main">
+    <a href="#top" class="nav-logo">Nichido Solutions Inc.</a>
+    <!-- The burger precedes the list in the DOM so that on mobile the menu it
+         opens is the NEXT thing in the tab order, not four Shift+Tabs back. -->
+    <button class="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#research">Research</a></li>
       <li><a href="#values">Values</a></li>
       <li><a href="#careers">Careers</a></li>
     </ul>
-    <button class="nav-burger" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
   </nav>
 
   <!-- ========== HERO ========== -->
@@ -835,29 +980,28 @@
     <h1 class="hero-heading hero-heading--stagger">Private research and development from Kyoto, Japan.</h1>
     <div class="hero-cta" data-reveal style="--reveal-delay:150ms">
       <p>Interested in working with us or learning more about our research?</p>
-      <a href="#careers" class="btn-dark">Get In Touch ↗</a>
+      <a href="#careers" class="btn btn--on-accent"><span class="arrow-line"></span>Get In Touch</a>
     </div>
   </section>
 
   <!-- ========== ABOUT ========== -->
-  <section id="about">
-    <span class="pill" data-reveal>About Us</span>
+  <section id="about" tabindex="-1">
+    <h2 class="pill" data-reveal>About Us</h2>
     <div class="about-body" data-reveal style="--reveal-delay:100ms">
       <p>
         <span class="about-name">Nichido Solutions Inc.</span>
-        <span class="c-dim"> is a private research and development company based </span><span class="c-blue c-bold">in Kyoto, Japan.</span>
+        <span> is a private research and development company based </span><span class="em">in Kyoto, Japan.</span>
       </p>
-      <p>&nbsp;</p>
       <p>
-        <span class="c-dim">Our work focuses on identifying inefficiencies in the foundational systems that shape modern infrastructure. We conduct research in several key domains including </span><span class="c-bold c-blue">communication systems, measurement standards, and global commerce.</span><span class="c-dim"> In many of these areas, existing paradigms were not designed for the technological and economic demands of the future. Our goal is to explore how these systems could be redesigned and improved to create lasting value for industry and society.</span>
+        <span>Our work focuses on identifying inefficiencies in the foundational systems that shape modern infrastructure. We conduct research in several key domains including </span><span class="em">communication systems, measurement standards, and global commerce.</span><span> In many of these areas, existing paradigms were not designed for the technological and economic demands of the future. Our goal is to explore how these systems could be redesigned and improved to create lasting value for industry and society.</span>
       </p>
     </div>
   </section>
 
   <!-- ========== RESEARCH LABEL ========== -->
-  <div id="research">
-    <span class="pill" data-reveal>Our Research:</span>
-  </div>
+  <section id="research" tabindex="-1">
+    <h2 class="pill" data-reveal>Our Research:</h2>
+  </section>
 
   <!-- ========== RESEARCH CARDS ========== -->
   <div class="cards-wrap">
@@ -901,7 +1045,8 @@
   </div>
 
   <!-- ========== WHAT IF ========== -->
-  <div id="values">
+  <section id="values" tabindex="-1">
+    <h2 class="sr-only">Values</h2>
     <div class="whatif-dark" data-reveal>
       <span class="whatif-text">What if<span class="qm">?</span></span>
     </div>
@@ -918,12 +1063,12 @@
         The question comes first.
       </p>
     </div>
-  </div>
+  </section>
 
   <!-- ========== CTA ========== -->
-  <section id="careers">
+  <section id="careers" tabindex="-1">
     <h2 data-reveal>Want to work with us?</h2>
-    <a href="mailto:contact@nichidosolutions.com" class="btn-accent" data-reveal style="--reveal-delay:100ms">
+    <a href="mailto:contact@nichidosolutions.com" class="btn btn--primary" data-reveal style="--reveal-delay:100ms">
       <span class="arrow-line"></span>Get In Touch
     </a>
   </section>
@@ -938,7 +1083,7 @@
       </div>
       <div class="footer-copy">© 2025 Nichido Solutions Inc.</div>
     </div>
-    <ul class="footer-nav">
+    <ul class="footer-nav" aria-label="Footer">
       <li><a href="#about">About</a></li>
       <li><a href="#research">Research</a></li>
       <li><a href="#values">Values</a></li>
@@ -954,7 +1099,7 @@
 
     <button class="cc-banner__close" type="button" aria-label="Close cookie banner">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
-        <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+        <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
     </button>
 
@@ -971,7 +1116,9 @@
     </button>
 
     <div class="cc-panel" id="cc-panel" hidden>
-      <div class="cc-cat">
+      <!-- Each row is a <label>, so the category name and description are part
+           of the tap target rather than an 18px box being the only hit area. -->
+      <label class="cc-cat">
         <div class="cc-cat__head">
           <span class="cc-cat__name">Essential</span>
           <span class="cc-cat__state" aria-hidden="true">Always on</span>
@@ -979,23 +1126,23 @@
         <p class="cc-cat__desc">Required for the site to work — remembers this choice, smooth scrolling, web fonts. No consent needed.</p>
         <input class="cc-cat__toggle" type="checkbox" checked disabled
                aria-label="Essential cookies, always on, cannot be turned off">
-      </div>
+      </label>
 
-      <div class="cc-cat">
+      <label class="cc-cat">
         <div class="cc-cat__head">
           <span class="cc-cat__name">Analytics</span>
         </div>
         <p class="cc-cat__desc">Would measure anonymous usage. None are active today.</p>
         <input class="cc-cat__toggle" id="cc-analytics" type="checkbox" aria-label="Analytics cookies">
-      </div>
+      </label>
 
-      <div class="cc-cat">
+      <label class="cc-cat">
         <div class="cc-cat__head">
           <span class="cc-cat__name">Marketing</span>
         </div>
         <p class="cc-cat__desc">Would support campaigns and personalization. None are active today.</p>
         <input class="cc-cat__toggle" id="cc-marketing" type="checkbox" aria-label="Marketing cookies">
-      </div>
+      </label>
 
       <button class="cc-banner__btn cc-banner__btn--secondary cc-save" type="button">Save preferences</button>
     </div>
@@ -1011,53 +1158,106 @@
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 
   <script>
-    /* ── Mobile nav toggle ── */
+    /* Reveal animations are gated behind html.js, so if this script never runs
+       (CDN failure, blocked JS) the page renders its content instead of leaving
+       most of the text at opacity 0. */
+    document.documentElement.classList.add('js');
+
+    const reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    /* ── Mobile nav toggle — class-driven, and it reports its ARIA state ── */
     const burger = document.querySelector('.nav-burger');
     const links  = document.querySelector('.nav-links');
+
+    function setNav(open) {
+      links.classList.toggle('is-open', open);
+      burger.setAttribute('aria-expanded', String(open));
+      burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
     burger.addEventListener('click', () => {
-      const open = links.style.display === 'flex';
-      links.style.display = open ? 'none' : 'flex';
-      if (!open) {
-        Object.assign(links.style, {
-          flexDirection: 'column',
-          position:      'absolute',
-          top:           '64px',
-          left:          '0',
-          right:         '0',
-          background:    '#e9e9e9',
-          padding:       '24px 19px 32px',
-          gap:           '20px',
-          fontSize:      '17px',
-          zIndex:        '998',
-        });
-      }
+      const open = !links.classList.contains('is-open');
+      setNav(open);
+      if (open) { const a = links.querySelector('a'); if (a) a.focus(); }
     });
     links.querySelectorAll('a').forEach(a =>
       a.addEventListener('click', () => {
-        if (window.getComputedStyle(burger).display !== 'none') {
-          links.style.display = 'none';
-        }
+        if (getComputedStyle(burger).display !== 'none') setNav(false);
       })
     );
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && links.classList.contains('is-open')) {
+        setNav(false); burger.focus();
+      }
+    });
+
+    /* ── Masthead: transparent over the hero artwork, solid paper past it ── */
+    (function () {
+      const nav = document.querySelector('nav');
+      const hero = document.querySelector('.hero');
+      if (!nav || !hero) return;
+      const setSolid = (solid) => nav.classList.toggle('is-solid', solid);
+      if (!('IntersectionObserver' in window)) { setSolid(true); return; }
+      /* A sentinel across the top of the hero: at rest the masthead is
+         transparent over the clean sky of the dither; the moment the busy part
+         of the artwork rises under it, the bar becomes paper. */
+      const sentinel = document.createElement('div');
+      sentinel.setAttribute('aria-hidden', 'true');
+      sentinel.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:120px;pointer-events:none;';
+      hero.prepend(sentinel);
+      new IntersectionObserver(([e]) => setSolid(!e.isIntersecting), { threshold: 0 }).observe(sentinel);
+    })();
+
+    /* ── Background video: honour prefers-reduced-motion (CSS cannot pause a
+          <video>, and both loop indefinitely) ── */
+    function applyVideoMotion(reduce) {
+      document.querySelectorAll('video').forEach(v => {
+        if (reduce) { v.removeAttribute('autoplay'); v.pause(); }
+        else { v.play().catch(() => {}); }
+      });
+    }
+    applyVideoMotion(reduceMotionMQ.matches);
 
     /* ── Lenis ── */
-    const lenis = new Lenis({
-      duration: 1.6,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      wheelMultiplier: 0.85,
-      touchMultiplier: 1.2,
-    });
-    function lenisRaf(time) { lenis.raf(time); requestAnimationFrame(lenisRaf); }
-    requestAnimationFrame(lenisRaf);
+    let lenis = null;
+    function initLenis() {
+      if (typeof Lenis !== 'function' || lenis) return;
+      try {
+        lenis = new Lenis({
+          duration: 1.6,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+          wheelMultiplier: 0.85,
+          touchMultiplier: 1.2,
+        });
+        const raf = (time) => { if (lenis) { lenis.raf(time); requestAnimationFrame(raf); } };
+        requestAnimationFrame(raf);
+      } catch (e) { lenis = null; }
+    }
+    if (!reduceMotionMQ.matches) initLenis();
 
+    /* Re-read the preference if it changes mid-session */
+    reduceMotionMQ.addEventListener('change', (e) => {
+      applyVideoMotion(e.matches);
+      if (e.matches && lenis) { lenis.destroy(); lenis = null; }
+      else if (!e.matches) initLenis();
+    });
+
+    /* In-page navigation moves focus as well as the viewport, so keyboard and
+       screen-reader users are not stranded in the nav. One nav offset, read
+       from the token, replacing three independent guesses. */
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', (e) => {
         const href = anchor.getAttribute('href');
         if (href === '#') return;
-        e.preventDefault();
         const target = document.querySelector(href);
-        if (target) lenis.scrollTo(target, { offset: -80, duration: 1.8 });
+        if (!target) return;
+        e.preventDefault();
+        const navH = parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10
+        ) || 64;
+        const land = () => target.focus({ preventScroll: true });
+        if (lenis) lenis.scrollTo(target, { offset: -(navH + 24), duration: 1.8, onComplete: land });
+        else { target.scrollIntoView({ behavior: 'auto', block: 'start' }); land(); }
       });
     });
 
@@ -1084,6 +1284,7 @@
     (function () {
       const h = document.querySelector('.hero-heading--stagger');
       if (!h) return;
+      if (reduceMotionMQ.matches) { h.classList.add('is-split', 'is-visible'); return; }
       const words = h.textContent.trim().split(/\s+/);
       h.textContent = '';
       words.forEach((word, i) => {
