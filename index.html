@@ -581,20 +581,60 @@
     @media (max-width: 899.98px) {
       .card { flex-direction: column; min-height: 0; }
       .card-commerce { min-height: 0; }
+
+      /* `display:contents` dissolves the text wrapper so the heading block, the
+         artwork and the body become siblings of the card. That lets the image
+         sit BETWEEN the subtitle and the body — title/subtitle, artwork, prose —
+         instead of being stranded above the whole text block. Padding moves onto
+         the children, since the wrapper no longer paints a box. */
       .card-inner {
-        order: 2; width: 100%;
-        padding: var(--card-pad-y) var(--card-pad-x);
+        display: contents;
         container-type: normal;
       }
-      .card-img {
-        position: relative; order: 1;
-        right: auto; left: auto; top: auto; bottom: auto;
-        width: 100%; height: clamp(240px, 34vw, 420px);
-        object-fit: cover; object-position: center;
-        border-bottom-right-radius: 0;
+      /* `display:contents` also discards the wrapper's `position:relative;
+         z-index:3`, which is what lifted the text above the card's ::before
+         fill, the noise ::after and the artwork. The children must carry it
+         themselves or they paint underneath the card background and vanish. */
+      .card-head, .card-body {
+        position: relative;
+        z-index: 3;
       }
-      .card-commerce .card-img { width: 100%; object-fit: cover; object-position: center bottom; }
-      .card-body { font-size: var(--t-1); margin-top: var(--sp-6); }
+      .card-head {
+        order: 1;
+        padding: var(--card-pad-y) var(--card-pad-x) 0;
+      }
+      .card-img {
+        order: 2;
+        position: relative;
+        right: auto; left: auto; top: auto; bottom: auto;
+      }
+      .card-body {
+        order: 3;
+        font-size: var(--t-1);
+        margin-top: 0;
+        padding: var(--sp-7) var(--card-pad-x) var(--card-pad-y);
+      }
+
+      /* The desktop art geometry is written as `.card-writing .card-img` (0,2,0),
+         so every narrow-width override has to match that weight or it silently
+         loses. Writing and Measurement hang right, echoing the desktop card
+         where the art is flush to the right edge. */
+      .card-writing .card-img,
+      .card-measurement .card-img {
+        width: 76%; height: auto;
+        margin: var(--sp-7) 0 0 auto;
+        object-fit: contain; object-position: right center;
+        border-radius: 0;
+      }
+
+      /* Commerce keeps the full-bleed treatment its wider artwork earns on
+         desktop — but square, so the corner never fights the card radius. */
+      .card-commerce .card-img {
+        width: 100%; height: auto;
+        margin: var(--sp-7) 0 0;
+        object-fit: contain; object-position: center bottom;
+        border-radius: 0;
+      }
     }
 
     /* =====================================================================
@@ -1010,7 +1050,7 @@
     <article class="card card-writing" data-reveal>
       <img class="card-img" src="./assets/img-writing.png" alt="">
       <div class="card-inner">
-        <div>
+        <div class="card-head">
           <h2 class="card-title">Rethinking Writing:</h2>
           <p class="card-sub">Systems for Clearer Thought</p>
         </div>
@@ -1022,7 +1062,7 @@
     <article class="card card-measurement" data-reveal>
       <img class="card-img" src="./assets/img-measurement.png" alt="">
       <div class="card-inner">
-        <div>
+        <div class="card-head">
           <h2 class="card-title">Rethinking Measurement:</h2>
           <p class="card-sub">Redefining Fit for Global Commerce</p>
         </div>
@@ -1034,7 +1074,7 @@
     <article class="card card-commerce" data-reveal>
       <img class="card-img" src="./assets/img-commerce.png" alt="">
       <div class="card-inner">
-        <div>
+        <div class="card-head">
           <h2 class="card-title">Direct Commerce:</h2>
           <p class="card-sub">A New Architecture for Global Trade</p>
         </div>
