@@ -614,6 +614,11 @@
         margin-top: 0;
         padding: var(--sp-5) var(--card-pad-x) var(--card-pad-y);
       }
+      /* Per-card gap between image and body — image densities differ, so the
+         optically-right gap does too. Writing sits close to a heavy dithered
+         hand; Commerce keeps the wider full-bleed breathing room. */
+      .card-writing .card-body  { padding-top: 10px; }
+      .card-commerce .card-body { padding-top: var(--sp-7); }
 
       /* The desktop art geometry is written as `.card-writing .card-img` (0,2,0),
          so every narrow-width override has to match that weight or it silently
@@ -628,8 +633,8 @@
         border-radius: 0;
       }
       .card-measurement .card-img {
-        width: 88%; height: auto;
-        margin: var(--sp-2) 0 0 auto;
+        width: 75%; height: auto;
+        margin: -5px 0 0 auto;
         object-fit: contain; object-position: right center;
         border-radius: 0;
       }
