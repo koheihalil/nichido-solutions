@@ -612,17 +612,24 @@
         order: 3;
         font-size: var(--t-1);
         margin-top: 0;
-        padding: var(--sp-7) var(--card-pad-x) var(--card-pad-y);
+        padding: var(--sp-5) var(--card-pad-x) var(--card-pad-y);
       }
 
       /* The desktop art geometry is written as `.card-writing .card-img` (0,2,0),
          so every narrow-width override has to match that weight or it silently
          loses. Writing and Measurement hang right, echoing the desktop card
-         where the art is flush to the right edge. */
-      .card-writing .card-img,
-      .card-measurement .card-img {
+         where the art is flush to the right edge. Their widths differ because
+         the artwork densities differ — the writing hand fills its frame; the
+         tape measure is a thin ribbon and needs more room to have any weight. */
+      .card-writing .card-img {
         width: 62%; height: auto;
         margin: var(--sp-5) 0 0 auto;
+        object-fit: contain; object-position: right center;
+        border-radius: 0;
+      }
+      .card-measurement .card-img {
+        width: 88%; height: auto;
+        margin: var(--sp-2) 0 0 auto;
         object-fit: contain; object-position: right center;
         border-radius: 0;
       }
